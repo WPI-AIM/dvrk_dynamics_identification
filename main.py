@@ -30,3 +30,4 @@ dh8.set_succ([dh9])
 
 kin = Kinematics(dh0)
 kin.cal_transfmats()
+kin.draw_frames()

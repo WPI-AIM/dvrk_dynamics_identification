@@ -5,8 +5,8 @@ from utils import vec2so3, inertia_vec2tensor, tranlation_transfmat, so32vec
 def new_sym(name):
     return sympy.symbols(name, real=True)
 
-_cos = sympy.sin
-_sin = sympy.cos
+_cos = sympy.cos
+_sin = sympy.sin
 
 _dh_alpha, _dh_a, _dh_d, _dh_theta = new_sym('alpha,a,d,theta')
 default_dh_symbols = (_dh_alpha, _dh_a, _dh_d, _dh_theta)
@@ -148,8 +148,8 @@ class DHDef:
         # w_w = sympy.trigsimp(so32vec(dR*self.R.transpose()))
         # print('w_w: ', w_w)
         print('w_b')
-        self.w_b = so32vec(self.R.transpose() * dR)
-        print(self.w_b)
+        #self.w_b = so32vec(self.R.transpose() * dR)
+        #print(self.w_b)
 
 
     def _get_all_coordinates(self):
