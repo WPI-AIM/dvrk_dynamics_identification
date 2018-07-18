@@ -77,6 +77,7 @@ class DHDef:
         self.w_b = sympy.ZeroMatrix(3, 1)
         self.v_cb = sympy.ZeroMatrix(3, 1)
 
+        self._coordinates = []
         if self._prev_link is not None:
             self._get_all_coordinates()
             self._gen_dyn_vars()
@@ -130,12 +131,12 @@ class DHDef:
         dq_subs_cells = [(dq, dqt) for dq, dqt in zip(self._d_coordinates, self._d_coordinates_t)]
         dq_subs_back_cells = [(qt, q) for q, qt in zip(self._d_coordinates, self._d_coordinates_t)]
 
-        print('pos_c: ', self.pos_c)
+        print('pos_c')
         t = sympy.symbols('t')
-        self.v_cb = sympy.diff(self.pos_c.subs(q_subs_cells), t)
-        self.v_cb = self.v_cb.subs(dq_subs_back_cells)
-        self.v_cb = self.v_cb.subs(q_subs_back_cells)
-        print('v_cb: ', self.v_cb)
+        self.v_cw = sympy.diff(self.pos_c.subs(q_subs_cells), t)
+        self.v_cw = self.v_cw.subs(dq_subs_back_cells)
+        self.v_cw = sympy.simplify(self.v_cw.subs(q_subs_back_cells))
+        print('v_cw')
 
         R_t = self.R.subs(q_subs_cells)
         print('dR_t')
@@ -148,7 +149,7 @@ class DHDef:
         # w_w = sympy.trigsimp(so32vec(dR*self.R.transpose()))
         # print('w_w: ', w_w)
         print('w_b')
-        #self.w_b = so32vec(self.R.transpose() * dR)
+        self.w_b = sympy.simplify(so32vec(self.R.transpose() * dR))
         #print(self.w_b)
 
 

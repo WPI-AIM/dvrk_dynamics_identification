@@ -46,7 +46,7 @@ class FrameDrawer:
         self._ax.plot([x - p3.item(0) * l, x + p3.item(0) * l],
                         [y - p3.item(1) * l, y + p3.item(1) * l],
                         [z - p3.item(2) * l, z + p3.item(2) * l],
-                        linewidth=6, color="k")
+                        linewidth=8, color="k")
         self._ax.text(x, y, z, str(num), 'z')
 
     def drawSegment(self, F1, F2):
@@ -58,7 +58,7 @@ class FrameDrawer:
         self._ax.plot([T1.item(0), T2.item(0)],
                         [T1.item(1), T2.item(1)],
                         [T1.item(2), T2.item(2)],
-                        linewidth=3, color="y")
+                        linewidth=5, color="y")
 
     def show(self):
         plt.show()
