@@ -10,7 +10,7 @@ class Geometry:
     def __init__(self, rbt_def):
         self.rbt_df = rbt_def
         self._cal_geom()
-        self._draw_geom()
+        # self._draw_geom()
 
     def _cal_geom(self):
         self.T_0n = list(range(self.rbt_df.frame_num))
@@ -28,7 +28,7 @@ class Geometry:
                 continue
             self.T_0n[num] = self.T_0n[self.rbt_df.prev_link_num[num]] * self.rbt_df.dh_T[num]
             self.R[num] = self.T_0n[num][0:3, 0:3]
-            self.T_0nc[num] = sympy.sympify(self.T_0n[num] * tranlation_transfmat(self.rbt_df.r[num]))
+            self.T_0nc[num] = sympy.sympify(self.T_0n[num] * tranlation_transfmat(self.rbt_df.r_by_ml[num]))
             print('pos_c')
             self.p_c[num] = self.T_0nc[num][0:3, 3]
             print('v_cw')
@@ -48,7 +48,12 @@ class Geometry:
             # print('w_w: ', w_w)
             print('w_b')
             self.w_b[num] = sympy.simplify(so32vec(self.R[num].transpose() * dR))
-            #print(self.w_b)
+        print('pos_c')
+        print(self.p_c)
+        print('v_cw')
+        print(self.v_cw)
+        print('w_b')
+        print(self.w_b)
 
     def _draw_geom(self):
         frame_drawer = FrameDrawer((-0.6, 0.2), (-0.6, 0.6), (-0.6, 0.2))

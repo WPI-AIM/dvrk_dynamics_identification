@@ -2,7 +2,7 @@ from dh_def import DHDef
 import sympy
 from sympy.physics.vector import dynamicsymbols
 import numpy as np
-from utils import inertia_vec2tensor
+from utils import inertia_vec2tensor, ml2r, Lmr2I
 
 
 def new_sym(name):
@@ -103,8 +103,12 @@ class RobotDef:
         self.m = list(range(self.frame_num))
         self.l = list(range(self.frame_num))
         self.r = list(range(self.frame_num))
+        self.r_by_ml = list(range(self.frame_num))
         self.L_vec = list(range(self.frame_num))
         self.I_vec = list(range(self.frame_num))
+        self.L_mat = list(range(self.frame_num))
+        self.I_mat = list(range(self.frame_num))
+        self.I_by_Llm = list(range(self.frame_num))
         self.Fc = list(range(self.frame_num))
         self.Fv = list(range(self.frame_num))
         self.Fo = list(range(self.frame_num))
@@ -115,6 +119,12 @@ class RobotDef:
             self.r[num] = [new_sym('r'+str(num)+dim) for dim in ['x', 'y', 'z']]
             self.I_vec[num] = [new_sym('I'+str(num)+elem) for elem in ['xx', 'xy', 'xz', 'yy', 'yz', 'zz']]
             self.L_vec[num] = [new_sym('L'+str(num)+elem) for elem in ['xx', 'xy', 'xz', 'yy', 'yz', 'zz']]
+
+            self.I_mat[num] = inertia_vec2tensor(self.I_vec[num])
+            self.L_mat[num] = inertia_vec2tensor(self.L_vec[num])
+
+            self.r_by_ml[num] = ml2r(self.m[num], self.l[num])
+            self.I_by_Llm[num] = Lmr2I(self.L_mat[num], self.m[num], self.r_by_ml[num])
 
             if 'Coulomb' in self.friction_type:
                 self.Fc[num] = new_sym('Fc' + str(num))
