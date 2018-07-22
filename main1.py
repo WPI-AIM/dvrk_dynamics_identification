@@ -2,6 +2,7 @@ from dh_def import *
 from robot_def import RobotDef
 from kinematics import Geometry
 from dynamics import Dynamics
+from trajectory_optimization import TrajOptimizer
 import time
 
 
@@ -35,4 +36,8 @@ robot_def = RobotDef([(0,   -1, [1],    0, 0, 0, 0),
 geom = Geometry(robot_def)
 
 dyn = Dynamics(robot_def, geom)
+
+traj_optimizer = TrajOptimizer(dyn, [])
+traj_optimizer.optimize()
+
 print(time.time() - start_time)

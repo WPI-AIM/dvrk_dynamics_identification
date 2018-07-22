@@ -62,6 +62,7 @@ class RobotDef:
             for s in self.dh_T[num].free_symbols:
                 if s not in self.coordinates:
                     self.coordinates += [s]
+        self.dof = len(self.coordinates)
         print(self.coordinates)
 
         self.d_coordinates = [new_sym('d'+co.name) for co in self.coordinates]
