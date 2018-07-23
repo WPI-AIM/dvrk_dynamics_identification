@@ -1,11 +1,7 @@
-import sympy
-import cvxpy as cp
-from pyOpt import Optimization
-from pyOpt import pyNSGA2
 from pyOpt import pySLSQP
 import pyOpt
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 q0_scale = np.pi
 fourier_scale = 1
@@ -19,7 +15,7 @@ fourier_scale = 1
 class TrajOptimizer:
     def __init__(self, dyn, order, base_freq, joint_constraints=[], cartesian_constraints = [],
                  q0_min=-q0_scale, q0_max=q0_scale,
-                 ab_min=-fourier_scale, ab_max=fourier_scale):
+                 ab_min=-fourier_scale, ab_max=fourier_scale, verbose=False):
         self._order = order
         self._base_freq = base_freq
         self._dyn = dyn
@@ -37,10 +33,13 @@ class TrajOptimizer:
         self._ab_min = ab_min
         self._ab_max = ab_max
 
+        # sample number for the highest term
+        self._sample_point = 10
+
         self._prepare_opt()
 
     def _prepare_opt(self):
-        sample_num = self._order * 10 + 1
+        sample_num = self._order * self._sample_point + 1
         self.sample_num = sample_num
 
         period = 1.0/self._base_freq
@@ -80,30 +79,52 @@ class TrajOptimizer:
         self.H = np.zeros((self._dyn.rbt_def.dof * sample_num, self._dyn.base_num))
 
 
-    def _obj_func(self, x):
-        # objective
+    def _fourier_base_x2q(self, x):
+
+        q = np.zeros((self.sample_num, self._dyn.rbt_def.dof))
+        dq = np.zeros((self.sample_num, self._dyn.rbt_def.dof))
+        ddq = np.zeros((self.sample_num, self._dyn.rbt_def.dof))
+
         for d in range(self._dyn.rbt_def.dof):
             start = d * (2 * self._order + 1)
             end = (d + 1) * (2 * self._order + 1)
-            self.q[:, d] = np.matmul(self.fourier_q_base, x[start:end])
-            self.dq[:, d] = np.matmul(self.fourier_dq_base, x[start:end])
-            self.ddq[:, d] = np.matmul(self.fourier_ddq_base, x[start:end])
+            q[:, d] = np.matmul(self.fourier_q_base, x[start:end])
+            dq[:, d] = np.matmul(self.fourier_dq_base, x[start:end])
+            ddq[:, d] = np.matmul(self.fourier_ddq_base, x[start:end])
+
+            print('q{}: {}'.format(d, q[:, d]))
+            print('dq{}: {}'.format(d, dq[:, d]))
+            print('ddq{}: {}'.format(d, ddq[:, d]))
+
+        return q, dq, ddq
+
+    def _obj_func(self, x):
+        # objective
+        q, dq, ddq = self._fourier_base_x2q(x)
+        # print('q:', q)
+        # print('dq: ', dq)
+        # print('ddq: ', ddq)
+
 
         for n in range(self.sample_num):
-            vars_input = self.q[n, :].tolist() + self.dq[n, :].tolist() + self.ddq[n, :].tolist()
-            self._dyn.H_b_func(*vars_input)
+            vars_input = q[n, :].tolist() + dq[n, :].tolist() + ddq[n, :].tolist()
+            self.H[n*self._dyn.rbt_def.dof:(n+1)*self._dyn.rbt_def.dof, :] = self._dyn.H_b_func(*vars_input)
+        # print('H: ', self.H)
+
 
         f = np.linalg.cond(self.H)
+        # print('f: ', f)
 
         # constraint
-        g = [0.0]*self._const_num
+        g = [0.0] * (self._const_num * self.sample_num)
         g_cnt = 0
 
         # Joint constraints
         for j_c in self._joint_constraints:
-            q, q_l, q_u, dq_l, dq_u = j_c
-            co_num = self._dyn.rbt_def.coordinates.index(q)
-            for qt, dqt in zip(self.q[:, co_num], self.dq[:, co_num]):
+            q_s, q_l, q_u, dq_l, dq_u = j_c
+            co_num = self._dyn.rbt_def.coordinates.index(q_s)
+
+            for qt, dqt in zip(q[:, co_num], dq[:, co_num]):
                 g[g_cnt] = qt - q_u
                 g_cnt += 1
                 g[g_cnt] = q_l - qt
@@ -112,7 +133,8 @@ class TrajOptimizer:
                 g_cnt += 1
                 g[g_cnt] = dq_l - dqt
                 g_cnt += 1
-        print('constraints number: ', g_cnt)
+        # print('g: ', g)
+        #print('constraints number: ', g_cnt)
         # Cartesian Constraints
 
         # fail
@@ -134,30 +156,63 @@ class TrajOptimizer:
             self._opt_prob.addVar('x'+str(num*joint_coef_num + 1), 'c',
                                   lower=self._q0_min, upper=self._q0_max,
                                   value=rand_local(self._q0_min, self._q0_max, 0.1))
+            # a sin
             for o in range(self._order):
-                # a sin
                 self._opt_prob.addVar('x' + str(num * joint_coef_num + 1 + o + 1), 'c',
                                       lower=self._ab_min, upper=self._ab_max,
                                       value=rand_local(self._ab_min, self._ab_max, 0.1))
-                # b cos
+            # b cos
+            for o in range(self._order):
                 self._opt_prob.addVar('x' + str(num * joint_coef_num + 1 + self._order + o + 1), 'c',
                                       lower=self._ab_min, upper=self._ab_max,
                                       value=rand_local(self._ab_min, self._ab_max, 0.1))
 
     def _add_const2prob(self):
-        self._opt_prob.addConGroup('g', self._const_num * self.sample_num, type='i', lower=0.0, upper=np.inf)
+        self._opt_prob.addConGroup('g', self._const_num * self.sample_num, type='i')
 
         # for c_c in self._cartesian_constraints:
         #     self._dyn.p_n[]
         # pass
 
     def optimize(self):
+        #self._prepare_opt()
         self._opt_prob = pyOpt.Optimization('Optimial Excitation Trajectory', self._obj_func)
         self._add_vars2prob()
         self._add_obj2prob()
         self._add_const2prob()
 
         print(self._opt_prob)
+        x = np.random.random((self._dyn.rbt_def.dof * (2*self._order+1)))
+        #print(self._obj_func(x))
+        slsqp = pyOpt.pySLSQP.SLSQP()
 
+        slsqp.setOption('IPRINT', -1)
 
-        pass
+        [fstr, xstr, inform] = slsqp(self._opt_prob, sens_type='FD')
+
+        self.f_result = fstr
+        self.x_result = xstr
+
+        print('fstr: ', fstr)
+        print('xstr: ', xstr)
+        print('inform: ', inform)
+
+        print self._opt_prob.solution(0)
+
+    def plot_traj(self):
+        fig, axs = plt.subplots(3, 1)
+
+        x = np.arange(0.0, 2.0, 0.02)
+        y1 = np.sin(2 * np.pi * x)
+        y2 = np.exp(-x)
+        l1, l2 = axs[0].plot(x, y1, 'rs-', x, y2, 'go')
+
+        y3 = np.sin(4 * np.pi * x)
+        y4 = np.exp(-2 * x)
+        l3, l4 = axs[1].plot(x, y3, 'yd-', x, y4, 'k^')
+
+        fig.legend((l1, l2), ('Line 1', 'Line 2'), 'upper left')
+        fig.legend((l3, l4), ('Line 3', 'Line 4'), 'upper right')
+
+        plt.tight_layout()
+        plt.show()

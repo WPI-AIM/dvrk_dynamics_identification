@@ -38,9 +38,10 @@ geom = Geometry(robot_def)
 
 dyn = Dynamics(robot_def, geom)
 
-traj_optimizer = TrajOptimizer(dyn, 6, 0.1,
-                               joint_constraints=[(q1, -np.pi/2, np.pi/2, -1, 1),
-                                                  (q2, -np.pi/2, np.pi/2, -1, 1)])
+traj_optimizer = TrajOptimizer(dyn, 5, 0.1,
+                               joint_constraints=[(q1, -np.pi/2, np.pi/2, -2*np.pi, 2*np.pi),
+                                                  (q2, -np.pi/2, np.pi/2, -2*np.pi, 2*np.pi)])
 traj_optimizer.optimize()
+traj_optimizer.plot_traj()
 
 print(time.time() - start_time)
