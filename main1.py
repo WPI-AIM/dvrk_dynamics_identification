@@ -1,3 +1,4 @@
+import numpy as np
 from dh_def import *
 from robot_def import RobotDef
 from kinematics import Geometry
@@ -37,7 +38,9 @@ geom = Geometry(robot_def)
 
 dyn = Dynamics(robot_def, geom)
 
-traj_optimizer = TrajOptimizer(dyn, [])
+traj_optimizer = TrajOptimizer(dyn, 6, 0.1,
+                               joint_constraints=[(q1, -np.pi/2, np.pi/2, -1, 1),
+                                                  (q2, -np.pi/2, np.pi/2, -1, 1)])
 traj_optimizer.optimize()
 
 print(time.time() - start_time)

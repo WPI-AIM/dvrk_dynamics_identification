@@ -14,6 +14,7 @@ class Geometry:
 
     def _cal_geom(self):
         self.T_0n = list(range(self.rbt_df.frame_num))
+        self.p_n = list(range(self.rbt_df.frame_num))
         self.T_0nc = list(range(self.rbt_df.frame_num))
         self.p_c = list(range(self.rbt_df.frame_num))
         self.R = list(range(self.rbt_df.frame_num))
@@ -28,6 +29,7 @@ class Geometry:
                 continue
             self.T_0n[num] = self.T_0n[self.rbt_df.prev_link_num[num]] * self.rbt_df.dh_T[num]
             self.R[num] = self.T_0n[num][0:3, 0:3]
+            self.p_n[num] = self.T_0n[num][0:3, 3]
             self.T_0nc[num] = sympy.sympify(self.T_0n[num] * tranlation_transfmat(self.rbt_df.r_by_ml[num]))
             print('pos_c')
             self.p_c[num] = self.T_0nc[num][0:3, 3]
@@ -36,7 +38,6 @@ class Geometry:
             v_cw = sympy.diff(self.p_c[num].subs(self.rbt_df.subs_q2qt), t)
             v_cw = v_cw.subs(self.rbt_df.subs_dqt2dq + self.rbt_df.subs_qt2q)
             self.v_cw[num] = sympy.simplify(v_cw)
-
 
             R_t = self.R[num].subs(self.rbt_df.subs_q2qt)
             print('dR_t')
