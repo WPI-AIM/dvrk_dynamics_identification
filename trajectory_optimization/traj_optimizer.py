@@ -2,6 +2,8 @@ from pyOpt import pySLSQP
 import pyOpt
 import numpy as np
 import matplotlib.pyplot as plt
+from fourier_traj import FourierTraj
+
 
 q0_scale = np.pi
 fourier_scale = 1
@@ -36,6 +38,8 @@ class TrajOptimizer:
         # sample number for the highest term
         self._sample_point = 10
 
+        self.fourier_traj = FourierTraj(self._dyn.rbt_def.dof, self._order, self._base_freq)
+
         self._prepare_opt()
 
     def _prepare_opt(self):
@@ -45,72 +49,19 @@ class TrajOptimizer:
         period = 1.0/self._base_freq
         t = np.linspace(0, period, num=sample_num)
 
-        self.fourier_q_base = np.zeros((sample_num, 2*self._order + 1))
-        self.fourier_dq_base = np.zeros((sample_num, 2 * self._order + 1))
-        self.fourier_ddq_base = np.zeros((sample_num, 2 * self._order + 1))
-
-        for n in range(self.sample_num):
-            self.fourier_q_base[n, 0] = 1
-            for o in range(self._order):
-                phase = 2 * np.pi * (o + 1) * t[n] * self._base_freq
-
-                c = 2 * np.pi * (o + 1) * self._base_freq
-                self.fourier_q_base[n, o+1] = np.sin(phase) / c
-                self.fourier_q_base[n, self._order+o+1] = -np.cos(phase) / c
-
-                self.fourier_dq_base[n, o+1] = np.sin(phase)
-                self.fourier_dq_base[n, self._order+o+1] = np.cos(phase)
-
-                self.fourier_ddq_base[n, o+1] = -c * np.sin(phase)
-                self.fourier_ddq_base[n, self._order+o+1] = c * np.cos(phase)
-
-        print('fourier_q_base:')
-        print(self.fourier_q_base)
-        print('fourier_dq_base:')
-        print(self.fourier_dq_base)
-        print('fourier_ddq_base:')
-        print(self.fourier_ddq_base)
-
-
-        self.q = np.zeros((sample_num, self._dyn.rbt_def.dof))
-        self.dq = np.zeros((sample_num, self._dyn.rbt_def.dof))
-        self.ddq = np.zeros((sample_num, self._dyn.rbt_def.dof))
-
         self.H = np.zeros((self._dyn.rbt_def.dof * sample_num, self._dyn.base_num))
-
-
-    def _fourier_base_x2q(self, x):
-
-        q = np.zeros((self.sample_num, self._dyn.rbt_def.dof))
-        dq = np.zeros((self.sample_num, self._dyn.rbt_def.dof))
-        ddq = np.zeros((self.sample_num, self._dyn.rbt_def.dof))
-
-        for d in range(self._dyn.rbt_def.dof):
-            start = d * (2 * self._order + 1)
-            end = (d + 1) * (2 * self._order + 1)
-            q[:, d] = np.matmul(self.fourier_q_base, x[start:end])
-            dq[:, d] = np.matmul(self.fourier_dq_base, x[start:end])
-            ddq[:, d] = np.matmul(self.fourier_ddq_base, x[start:end])
-
-            print('q{}: {}'.format(d, q[:, d]))
-            print('dq{}: {}'.format(d, dq[:, d]))
-            print('ddq{}: {}'.format(d, ddq[:, d]))
-
-        return q, dq, ddq
 
     def _obj_func(self, x):
         # objective
-        q, dq, ddq = self._fourier_base_x2q(x)
+        q, dq, ddq = self.fourier_traj.fourier_base_x2q(x)
         # print('q:', q)
         # print('dq: ', dq)
         # print('ddq: ', ddq)
-
 
         for n in range(self.sample_num):
             vars_input = q[n, :].tolist() + dq[n, :].tolist() + ddq[n, :].tolist()
             self.H[n*self._dyn.rbt_def.dof:(n+1)*self._dyn.rbt_def.dof, :] = self._dyn.H_b_func(*vars_input)
         # print('H: ', self.H)
-
 
         f = np.linalg.cond(self.H)
         # print('f: ', f)
@@ -198,21 +149,3 @@ class TrajOptimizer:
         print('inform: ', inform)
 
         print self._opt_prob.solution(0)
-
-    def plot_traj(self):
-        fig, axs = plt.subplots(3, 1)
-
-        x = np.arange(0.0, 2.0, 0.02)
-        y1 = np.sin(2 * np.pi * x)
-        y2 = np.exp(-x)
-        l1, l2 = axs[0].plot(x, y1, 'rs-', x, y2, 'go')
-
-        y3 = np.sin(4 * np.pi * x)
-        y4 = np.exp(-2 * x)
-        l3, l4 = axs[1].plot(x, y3, 'yd-', x, y4, 'k^')
-
-        fig.legend((l1, l2), ('Line 1', 'Line 2'), 'upper left')
-        fig.legend((l3, l4), ('Line 3', 'Line 4'), 'upper right')
-
-        plt.tight_layout()
-        plt.show()

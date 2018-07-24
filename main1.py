@@ -4,6 +4,7 @@ from robot_def import RobotDef
 from kinematics import Geometry
 from dynamics import Dynamics
 from trajectory_optimization import TrajOptimizer
+from trajectory_optimization import TrajPlotter
 import time
 
 
@@ -42,6 +43,7 @@ traj_optimizer = TrajOptimizer(dyn, 5, 0.1,
                                joint_constraints=[(q1, -np.pi/2, np.pi/2, -2*np.pi, 2*np.pi),
                                                   (q2, -np.pi/2, np.pi/2, -2*np.pi, 2*np.pi)])
 traj_optimizer.optimize()
-traj_optimizer.plot_traj()
 
+traj_plotter = TrajPlotter(traj_optimizer.fourier_traj)
+traj_plotter.plot_desired_traj(traj_optimizer.x_result)
 print(time.time() - start_time)

@@ -8,6 +8,7 @@ class FourierTraj:
         self.base_freq = base_freq
         self.sample_num_per_period = sample_num_per_period
         self.sample_num = self.order * self.sample_num_per_period + 1
+        #self.coordinates = coordinates
 
         self._gen_q_base()
 
@@ -53,8 +54,8 @@ class FourierTraj:
             dq[:, d] = np.matmul(self.fourier_dq_base, x[start:end])
             ddq[:, d] = np.matmul(self.fourier_ddq_base, x[start:end])
 
-            print('q{}: {}'.format(d, q[:, d]))
-            print('dq{}: {}'.format(d, dq[:, d]))
-            print('ddq{}: {}'.format(d, ddq[:, d]))
+            # print('q{}: {}'.format(d, q[:, d]))
+            # print('dq{}: {}'.format(d, dq[:, d]))
+            # print('ddq{}: {}'.format(d, ddq[:, d]))
 
         return q, dq, ddq
