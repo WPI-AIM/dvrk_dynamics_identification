@@ -36,9 +36,10 @@ class TrajOptimizer:
         self._ab_max = ab_max
 
         # sample number for the highest term
-        self._sample_point = 10
+        self._sample_point = 12
 
-        self.fourier_traj = FourierTraj(self._dyn.rbt_def.dof, self._order, self._base_freq)
+        self.fourier_traj = FourierTraj(self._dyn.rbt_def.dof, self._order, self._base_freq,
+                                        sample_num_per_period=self._sample_point)
 
         self._prepare_opt()
 
