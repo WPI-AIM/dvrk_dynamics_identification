@@ -28,7 +28,9 @@ class RobotDefParamTestCase(RobotDefTestCase):
 
 class RobotDefCoordinateTestCase(RobotDefTestCase):
     def runTest(self):
-        self.assertEquals(self.rbt_def.coordinates, [new_sym('q1'), new_sym('q2')], "incorrect coordinate definition")
+        self.assertEquals(self.rbt_def.coordinates,
+                          [new_sym('q1'), new_sym('q2')],
+                          "incorrect coordinate definition")
 
 
 def get_rbt_def_test_suite():

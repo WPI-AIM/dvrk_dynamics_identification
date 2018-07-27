@@ -8,6 +8,9 @@ Uses SymPy, Numpy, PyOpt, Matplotlib and Cvxpy modules
 ## Features
 ### Finished
 * Symbolic dynamic modelling based on DH parameters and geometric tree
+    * Geometrical modelling
+    * Dynamic modelling
+    * Base parameter generation using QR decomposition
 * Optimal excitation trajectory generation based on fourier-series
 ### Yet to be done
 * Data processing
