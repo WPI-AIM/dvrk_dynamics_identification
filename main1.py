@@ -1,10 +1,11 @@
 import numpy as np
-from dh_def import *
+import sympy
 from robot_def import RobotDef
 from kinematics import Geometry
 from dynamics import Dynamics
 from trajectory_optimization import TrajOptimizer
 from trajectory_optimization import TrajPlotter
+from utils import new_sym
 import time
 
 
@@ -29,17 +30,19 @@ start_time = time.time()
 #                      friction_type=['Coulomb', 'viscous', 'offset'])
 
 
-robot_def = RobotDef([(0,   -1, [1],    0, 0, 0, 0),
-                      (1,   0,  [2],    0, 0, -0.21537, q1),
-                      (2,   1,  [3],     0, -sympy.pi/2, 0, q2+sympy.pi/2)],
+robot_def = RobotDef([(0,   -1, [1],    0,      0,              0,          0),
+                      (1,   0,  [2],    0,      0,              -0.21537,   q1),
+                      (2,   1,  [3],    0,      -sympy.pi/2,    0,          q2+sympy.pi/2),
+                      (3,   2,  [4],    0.279,  0,              0,          q3 + sympy.pi / 2)],
                      dh_convention='mdh',
                      friction_type=['Coulomb', 'viscous', 'offset'])
 
 geom = Geometry(robot_def)
+geom.draw_geom()
 
 dyn = Dynamics(robot_def, geom)
 
-traj_optimizer = TrajOptimizer(dyn, 5, 0.1,
+traj_optimizer = TrajOptimizer(dyn, 6, 0.1,
                                joint_constraints=[(q1, -np.pi/2, np.pi/2, -2*np.pi, 2*np.pi),
                                                   (q2, -np.pi/2, np.pi/2, -2*np.pi, 2*np.pi)])
 traj_optimizer.optimize()

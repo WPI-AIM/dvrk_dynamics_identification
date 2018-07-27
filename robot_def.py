@@ -2,7 +2,7 @@ from dh_def import DHDef
 import sympy
 from sympy.physics.vector import dynamicsymbols
 import numpy as np
-from utils import inertia_vec2tensor, ml2r, Lmr2I
+from utils import inertia_vec2tensor, ml2r, Lmr2I, new_sym
 
 
 def new_sym(name):
@@ -28,9 +28,21 @@ _modified_dh_transfmat = sympy.Matrix([
 
 _friction_types = ['Coulomb', 'viscous', 'offset']
 
+verbose = False
+
+if verbose:
+    def vprint(*args):
+        # Print each argument separately so caller doesn't need to
+        # stuff everything to be printed into a single string
+        for arg in args:
+           print arg,
+        print
+else:
+    vprint = lambda *a: None      # do-nothing function
 
 class RobotDef:
     def __init__(self, params, dh_convention='mdh', friction_type=['viscous']):
+
         self.frame_num = len(params)
         self.link_nums = [p[0] for p in params]
         self.prev_link_num = [p[1] for p in params]
@@ -45,9 +57,9 @@ class RobotDef:
         elif self.dh_convention in ['mdh', 'modified']:
             self._dh_transmat = _modified_dh_transfmat
         self.friction_type = friction_type
-        print("frame_number: ", self.frame_num)
-        print(self.succ_link_num)
-        print(sympy.Matrix(self.dh_a + self.dh_alpha + self.dh_d + self.dh_theta).free_symbols)
+        vprint("frame_number: ", self.frame_num)
+        vprint(self.succ_link_num)
+        vprint(sympy.Matrix(self.dh_a + self.dh_alpha + self.dh_d + self.dh_theta).free_symbols)
         #print(sympy.Matrix(self.dh_a + self.dh_alpha, self.dh_d + self.dh_theta))
         #for p in dh_params:
 
@@ -68,28 +80,28 @@ class RobotDef:
 
         self.d_coordinates = [new_sym('d'+co.name) for co in self.coordinates]
         self.dd_coordinates = [new_sym('dd' + co.name) for co in self.coordinates]
-        print(self.d_coordinates)
-        print(self.dd_coordinates)
+        vprint(self.d_coordinates)
+        vprint(self.dd_coordinates)
 
         self.coordinates_t = [dynamicsymbols(co.name+'t') for co in self.coordinates]
-        print(self.coordinates_t)
+        vprint(self.coordinates_t)
         self.d_coordinates_t = [sympy.diff(co_t) for co_t in self.coordinates_t]
-        print(self.d_coordinates_t)
+        vprint(self.d_coordinates_t)
         self.dd_coordinates_t = [sympy.diff(d_co_t) for d_co_t in self.d_coordinates_t]
-        print(self.dd_coordinates_t)
+        vprint(self.dd_coordinates_t)
 
         self.subs_q2qt = [(q, qt) for q, qt in zip(self.coordinates, self.coordinates_t)]
-        print(self.subs_q2qt)
+        vprint(self.subs_q2qt)
         self.subs_dq2dqt = [(dq, dqt) for dq, dqt in zip(self.d_coordinates, self.d_coordinates_t)]
-        print(self.subs_dq2dqt)
+        vprint(self.subs_dq2dqt)
         self.subs_ddq2ddqt = [(ddq, ddqt) for ddq, ddqt in zip(self.dd_coordinates, self.dd_coordinates_t)]
-        print(self.subs_ddq2ddqt)
+        vprint(self.subs_ddq2ddqt)
         self.subs_qt2q = [(qt, q) for q, qt in zip(self.coordinates, self.coordinates_t)]
-        print(self.subs_qt2q)
+        vprint(self.subs_qt2q)
         self.subs_dqt2dq = [(dqt, dq) for dq, dqt in zip(self.d_coordinates, self.d_coordinates_t)]
-        print(self.subs_dqt2dq)
+        vprint(self.subs_dqt2dq)
         self.subs_ddqt2ddq = [(ddqt, ddq) for ddq, ddqt in zip(self.dd_coordinates, self.dd_coordinates_t)]
-        print(self.subs_ddq2ddqt)
+        vprint(self.subs_ddq2ddqt)
 
     def _gen_dh_transfm(self):
         self.dh_T = []
@@ -135,10 +147,10 @@ class RobotDef:
             if 'offset' in self.friction_type:
                 self.Fo[num] = new_sym('Fo' + str(num))
 
-        print(self.m)
-        print(self.l)
-        print(self.r)
-        print(self.I_vec, self.L_vec)
+        vprint(self.m)
+        vprint(self.l)
+        vprint(self.r)
+        vprint(self.I_vec, self.L_vec)
 
     def _dyn_params(self):
         self.params = []
@@ -155,4 +167,4 @@ class RobotDef:
             if 'offset' in self.friction_type:
                 self.params += [self.Fo[num]]
 
-        print(self.params)
+        vprint(self.params)

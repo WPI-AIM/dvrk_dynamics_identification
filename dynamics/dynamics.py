@@ -11,7 +11,7 @@ import time
 
 
 class Dynamics:
-    def __init__(self, rbt_def, geom, g=[0, 0, -9.81]):
+    def __init__(self, rbt_def, geom, g=[0, 0, -9.81], verbose=False):
         self.rbt_def = rbt_def
         self._geom = geom
         self._g = np.matrix(g)

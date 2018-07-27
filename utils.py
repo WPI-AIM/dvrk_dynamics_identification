@@ -1,6 +1,9 @@
 import sympy
 
 
+def new_sym(name):
+    return sympy.symbols(name, real=True)
+
 
 def vec2so3(vec):
     return sympy.Matrix([[0,        -vec[2],    vec[1]],

@@ -6,11 +6,24 @@ from frame_drawer import FrameDrawer
 from utils import tranlation_transfmat, so32vec
 
 
+verbose = True
+
+if verbose:
+    def vprint(*args):
+        # Print each argument separately so caller doesn't need to
+        # stuff everything to be printed into a single string
+        for arg in args:
+           print arg,
+        print
+else:
+    vprint = lambda *a: None      # do-nothing function
+
+
 class Geometry:
     def __init__(self, rbt_def):
         self.rbt_df = rbt_def
         self._cal_geom()
-        # self._draw_geom()
+        # self.draw_geom()
 
     def _cal_geom(self):
         self.T_0n = list(range(self.rbt_df.frame_num))
@@ -31,32 +44,32 @@ class Geometry:
             self.R[num] = self.T_0n[num][0:3, 0:3]
             self.p_n[num] = self.T_0n[num][0:3, 3]
             self.T_0nc[num] = sympy.sympify(self.T_0n[num] * tranlation_transfmat(self.rbt_df.r_by_ml[num]))
-            print('pos_c')
+            vprint('pos_c{}'.format(num))
             self.p_c[num] = self.T_0nc[num][0:3, 3]
-            print('v_cw')
+            vprint('v_cw{}'.format(num))
 
             v_cw = sympy.diff(self.p_c[num].subs(self.rbt_df.subs_q2qt), t)
             v_cw = v_cw.subs(self.rbt_df.subs_dqt2dq + self.rbt_df.subs_qt2q)
             self.v_cw[num] = sympy.simplify(v_cw)
 
             R_t = self.R[num].subs(self.rbt_df.subs_q2qt)
-            print('dR_t')
+            vprint('dR_t{}'.format(num))
             dR_t = sympy.diff(R_t)
-            print('subs dq')
+            vprint('subs dq{}'.format(num))
             dR = dR_t.subs(self.rbt_df.subs_dqt2dq + self.rbt_df.subs_qt2q)
             #print(dR)
             # w_w = sympy.trigsimp(so32vec(dR*self.R.transpose()))
             # print('w_w: ', w_w)
-            print('w_b')
+            vprint('w_b')
             self.w_b[num] = sympy.simplify(so32vec(self.R[num].transpose() * dR))
-        print('pos_c')
-        print(self.p_c)
-        print('v_cw')
-        print(self.v_cw)
-        print('w_b')
-        print(self.w_b)
+        vprint('pos_c')
+        vprint(self.p_c)
+        vprint('v_cw')
+        vprint(self.v_cw)
+        vprint('w_b')
+        vprint(self.w_b)
 
-    def _draw_geom(self):
+    def draw_geom(self):
         frame_drawer = FrameDrawer((-0.6, 0.2), (-0.6, 0.6), (-0.6, 0.2))
 
         subs_q2zero = [(q, 0) for q in self.rbt_df.coordinates]
