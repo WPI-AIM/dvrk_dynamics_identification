@@ -1,5 +1,4 @@
 import sympy
-import dh_def
 import matplotlib.pyplot as plt
 from frame_drawer import FrameDrawer
 import numpy as np

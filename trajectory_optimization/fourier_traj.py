@@ -1,6 +1,19 @@
 import numpy as np
 
 
+verbose = True
+
+if verbose:
+    def vprint(*args):
+        # Print each argument separately so caller doesn't need to
+        # stuff everything to be printed into a single string
+        for arg in args:
+           print arg,
+        print
+else:
+    vprint = lambda *a: None      # do-nothing function
+
+
 class FourierTraj:
     def __init__(self, dof, order, base_freq, sample_num_per_period=10):
         self.dof = dof
@@ -35,12 +48,12 @@ class FourierTraj:
                 self.fourier_ddq_base[n, o + 1] = -c * np.sin(phase)
                 self.fourier_ddq_base[n, self.order + o + 1] = c * np.cos(phase)
 
-        print('fourier_q_base:')
-        print(self.fourier_q_base)
-        print('fourier_dq_base:')
-        print(self.fourier_dq_base)
-        print('fourier_ddq_base:')
-        print(self.fourier_ddq_base)
+        vprint('fourier_q_base:')
+        vprint(self.fourier_q_base)
+        vprint('fourier_dq_base:')
+        vprint(self.fourier_dq_base)
+        vprint('fourier_ddq_base:')
+        vprint(self.fourier_ddq_base)
 
     def fourier_base_x2q(self, x):
         q = np.zeros((self.sample_num, self.dof))

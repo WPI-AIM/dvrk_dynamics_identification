@@ -3,9 +3,8 @@ from sympy import lambdify
 from sympy.utilities.iterables import flatten
 import numpy as np
 from collections import deque
-from utils import vec2so3
+from utils import vec2so3, new_sym
 from dyn_param_dep import find_dyn_parm_deps
-from dh_def import new_sym
 from sympy import pprint
 import time
 
