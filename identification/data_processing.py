@@ -264,7 +264,9 @@ def diff_and_filt_data(dof, h, t, q_raw, tau_raw, fc_q, fc_tau, fc_dq, fc_ddq, f
 #
 #     return W, T
 #
-#
+
+
+
 # def regr_matrices(dof, parm_num, q, dq, ddq, tau, regr_func):
 #     sn = q.shape[0]
 #
@@ -299,12 +301,13 @@ def diff_and_filt_data(dof, h, t, q_raw, tau_raw, fc_q, fc_tau, fc_dq, fc_ddq, f
 #
 #     return W, omega, Q1, R1, rho1
 
+
 def plot_trajectory_data(t, q_raw, q_f, dq_f, ddq_f, tau_raw, tau_f):
     dof = q_raw.shape[1]
     plot_shape = 400 + dof*10
     print("plot shape: {}".format(plot_shape))
 
-    fig = plt.figure(1)
+    fig = plt.figure()
 
     for i in range(dof):
         plt_q = fig.add_subplot(4, dof, i + 1)
@@ -334,43 +337,38 @@ def plot_trajectory_data(t, q_raw, q_f, dq_f, ddq_f, tau_raw, tau_f):
         if i == 0:
             plt_tau.set_ylabel(r'$\tau$ (Nm) or $f$ (N)')
 
-    # position
-    # for d in range(self._fourier_traj.dof):
-    #     _, linestyle = linestyles[d]
-    #     plt_q.plot(x, q[:, d], label=(r"$q_" + str(d + 1) + "$"), linestyle=linestyle)
-    #plt_q.legend()
-
-
-
-    # velocity
-    # plt_dq = fig.add_subplot(322)
-    # for d in range(self._fourier_traj.dof):
-    #     _, linestyle = linestyles[d]
-    #     plt_dq.plot(x, dq[:, d], label=(r"$\dot{q}_" + str(d + 1) + "$"), linestyle=linestyle)
-
-    # plt_dq.legend()
-    # plt_dq.set_ylabel(r'$\dot{q}$ (rad/s or m/s)')
-
-    # acceleration
-    #plt_ddq = fig.add_subplot(324)
-    # for d in range(self._fourier_traj.dof):
-    #     print('traj:', d)
-    #     _, linestyle = linestyles[d]
-    #     plt_ddq.plot(x, ddq[:, d], label=(r"$\ddot{q}_" + str(d + 1) + "$"), linestyle=linestyle)
-
-    # plt_ddq.legend()
-    # plt_ddq.set_xlabel(r'$t$ (s)')
-    # plt_ddq.set_ylabel(r'$\ddot{q}$ (rad/s$^2$ or m/s$^2$)')
     plt.tight_layout()
     plt.show()
 
-def gen_regressor(param_num, H, q, dq, ddq):
+
+def plot_meas_pred_tau(t, tau_m, tau_p):
+    sample_num, dof = tau_m.shape
+
+    fig = plt.figure()
+
+    for i in range(dof):
+        plt_tau = fig.add_subplot(dof, 1, i + 1)
+        plt_tau.plot(t, tau_m[:, i])
+        plt_tau.plot(t, tau_p[:, i])
+        plt_tau.set_xlabel(r'$t$ (s)')
+        if i == 0:
+            plt_tau.set_ylabel(r'$\tau$ (Nm) or $f$ (N)')
+
+    plt.tight_layout()
+    plt.show()
+
+
+def gen_regressor(param_num, H, q, dq, ddq, tau):
     sample_num, dof = q.shape
 
     W = np.zeros((sample_num*dof, param_num))
+    tau_s = np.zeros(sample_num*dof)
 
     for i in range(sample_num):
-        vars_input = q[i,:].tolist() + dq[i,:].tolist() + ddq[i,:].tolist()
-        W[i*dof:(i+1)*dof, :] = H(vars_input)
+        vars_input = q[i, :].tolist() + dq[i, :].tolist() + ddq[i, :].tolist()
+        W[i*dof:(i+1)*dof, :] = H(*vars_input)
 
-    return W
+        for d in range(dof):
+            tau_s[i*dof + d] = tau[i, d]
+
+    return W, tau_s
