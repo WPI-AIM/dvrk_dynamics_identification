@@ -1,6 +1,9 @@
 import sympy
 
 
+def new_sym(name):
+    return sympy.symbols(name, real=True)
+
 
 def vec2so3(vec):
     return sympy.Matrix([[0,        -vec[2],    vec[1]],
@@ -25,3 +28,11 @@ def tranlation_transfmat(v):
                         [0, 1, 0, v[1]],
                         [0, 0, 1, v[2]],
                         [0, 0, 0, 1]])
+
+
+def ml2r(m, l):
+    return sympy.Matrix(l) / m
+
+
+def Lmr2I(L, m, r):
+    return sympy.Matrix(L - m * vec2so3(r).transpose() * vec2so3(r))
