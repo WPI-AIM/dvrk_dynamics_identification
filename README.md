@@ -54,7 +54,7 @@ When developing this work, we referred a lot from the following places:
 
 ## Some problems
 When I was using PyOpt, I found some problems with it. In pySLSQP.py file, these changes should be done.
-
+```
 gg = numpy.zeros([la], numpy.float) ==> gg = numpy.zeros(la, numpy.float)
 
 dg = numpy.zeros([la,n+1], numpy.float) ==> dg = numpy.zeros([la[0], n + 1], numpy.float)
@@ -62,6 +62,6 @@ dg = numpy.zeros([la,n+1], numpy.float) ==> dg = numpy.zeros([la[0], n + 1], num
 w = numpy.zeros([lw], numpy.float) ==> w = numpy.zeros(lw, numpy.float)
 
 jw = numpy.zeros([ljw], numpy.intc) ==> jw = numpy.zeros(ljw, numpy.intc)
-
+```
 
 		
