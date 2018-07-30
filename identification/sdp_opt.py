@@ -9,7 +9,7 @@ small_positive_num = 0.00000001
 
 
 class SDPOpt:
-    def __init__(self, W, tau, params, dof):
+    def __init__(self, W, tau, params, dof, constraints=[]):
         self._W = W
         self._tau = tau
         self._m, self._n = self._W.shape
@@ -38,8 +38,11 @@ class SDPOpt:
                 D += DLkis[i] * self._x[d * 10 + i]
                 # += sympy.Matrix(DLkis[i]) * self._param[d * 10 + i]
             #print(D1)
-            Ds.append(D >> np.identity(6) * small_positive_num)
-        self._constraints += Ds
+            # semi-definite constraint
+            self._constraints.append(D >> np.identity(6) * small_positive_num)
+            # reasonable
+
+
         # i = 0
         # while i < self._n:
 

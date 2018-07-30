@@ -3,7 +3,6 @@
 There are parallelograms, springs and counter weights in daVinci surgical system so that we can not use existing tools
 to solve the dynamics model identification of it. This software framework was developed to solve these problems.
 
-Uses SymPy, Numpy, PyOpt, Matplotlib and Cvxpy modules
 
 ## Features
 ### Finished
@@ -28,10 +27,19 @@ Uses SymPy, Numpy, PyOpt, Matplotlib and Cvxpy modules
 * Output of the identified paramters
 * Output of C++ or Python code of identified dynamic model for control use 
 
+### Another to-do list
+* Add friction parameters into dynamic model
+* Add Cartisian constraints in optimal excitation trajectory generation
+* Add constraints of mass, center of mass and friction in SDP
+* Save and load parameters for each step to avoid repetitive work every time
+* Regularize output print
+* Add motor inertia
+* Add spring parameters into dynamics model 
+
 ## Requirements
 * Python 2.7
 * Python modules
-    * numpy, scipy, sympy, cvxopt, matplotlib
+    * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt
 
 ## Example
 
