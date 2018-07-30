@@ -1,4 +1,5 @@
 import sympy
+import numpy as np
 
 
 def new_sym(name):
@@ -23,6 +24,10 @@ def inertia_vec2tensor(vec):
                          [vec[2], vec[4], vec[5]]])
 
 
+def inertia_tensor2vec(I):
+    return [I[0, 0], I[0, 1], I[0, 2], I[1, 1], I[1, 2], I[2, 2]]
+
+
 def tranlation_transfmat(v):
     return sympy.Matrix([[1, 0, 0, v[0]],
                         [0, 1, 0, v[1]],
@@ -36,3 +41,45 @@ def ml2r(m, l):
 
 def Lmr2I(L, m, r):
     return sympy.Matrix(L - m * vec2so3(r).transpose() * vec2so3(r))
+
+
+def gen_DLki_mat():
+    M = list(range(10))
+    for i in range(10):
+        M[i] = np.zeros((6, 6))
+    # Lxx
+    M[0][0, 0] = 1
+    # Lxy
+    M[1][0, 1] = 1
+    M[1][1, 0] = 1
+    # Lxz
+    M[2][0, 2] = 1
+    M[2][2, 0] = 1
+    # Lyy
+    M[3][1, 1] = 1
+    # Lyz
+    M[4][1, 2] = 1
+    M[4][2, 1] = 1
+    # Lzz
+    M[5][2, 2] = 1
+    # lx
+    M[6][1, 5] = 1
+    M[6][5, 1] = 1
+    M[6][2, 4] = -1
+    M[6][4, 2] = -1
+    # ly
+    M[7][0, 5] = -1
+    M[7][5, 0] = -1
+    M[7][2, 3] = 1
+    M[7][3, 2] = 1
+    # lz
+    M[8][0, 4] = 1
+    M[8][4, 0] = 1
+    M[8][1, 3] = -1
+    M[8][3, 1] = -1
+    # m
+    M[9][3, 3] = 1
+    M[9][4, 4] = 1
+    M[9][5, 5] = 1
+
+    return M

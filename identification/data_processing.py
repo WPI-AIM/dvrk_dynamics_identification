@@ -6,7 +6,7 @@ import scipy.signal
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from utils import ml2r, Lmr2I, inertia_vec2tensor, inertia_tensor2vec
 
 
 # the format of file should be q0, tau0, q1, tau1, ..., qn, taun
@@ -372,3 +372,22 @@ def gen_regressor(param_num, H, q, dq, ddq, tau):
             tau_s[i*dof + d] = tau[i, d]
 
     return W, tau_s
+
+
+def barycentric2standard_params(x, params):
+    i = 0
+    x_out = []
+    while i < len(params):
+        m = x[i + 9]
+        rx, ry, rz = x[i + 6] / m, x[i + 7] / m, x[i + 8] / m
+        r = [rx, ry, rz]
+        L_mat = inertia_vec2tensor(x[i: i + 6])
+        I_vec = inertia_tensor2vec(Lmr2I(L_mat, m, r))
+
+        print(I_vec, r, m)
+        x_out += I_vec + r + [m]
+
+        i += 10
+
+    return x_out
+
