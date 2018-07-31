@@ -13,9 +13,9 @@ def vec2so3(vec):
 
 
 def so32vec(mat):
-    return sympy.Matrix([[mat[2,1]],
-                         [mat[0,2]],
-                         [mat[1,0]]])
+    return sympy.Matrix([[mat[2, 1]],
+                         [mat[0, 2]],
+                         [mat[1, 0]]])
 
 
 def inertia_vec2tensor(vec):

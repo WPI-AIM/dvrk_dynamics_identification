@@ -5,83 +5,74 @@ import osqp
 from utils import gen_DLki_mat
 
 
-small_positive_num = 0.00000001
+small_positive_num = 0.00001
 
 
 class SDPOpt:
-    def __init__(self, W, tau, params, dof, constraints=[]):
+    def __init__(self, W, tau, params, dof, value_constraints=[]):
         self._W = W
         self._tau = tau
         self._m, self._n = self._W.shape
         self._param = params
         self._dof = dof
+        value_constraints_len = len(value_constraints)
+        if value_constraints_len != 0:
+            if value_constraints_len != dof:
+                raise ValueError("Value constraint number {} should be the same as the DoF of the robot {}.".format(
+                    value_constraints_len, self._dof))
+            for c in value_constraints:
+                if len(c) != 8:
+                    raise ValueError("The constraint should be a tuple of " +
+                                     "(min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z).")
+                if c[0] < 0 or c[1] < 0:
+                    raise ValueError("Mass constraints should be positive.")
+        self._value_constraints = value_constraints
 
-        print(W.shape)
-        print(tau.shape)
+        print("Regressor shape: {}".format(W.shape))
+        print("Regressand shape: {}".format(tau.shape))
 
     def _create_var(self):
+        print("Creating variables...")
         self._x = cp.Variable(self._n)
 
     def _create_obj(self):
+        print("Creating optimization objective...")
         self._obj = cp.Minimize(cp.sum_squares(self._W*self._x - self._tau))
 
     def _create_constraints(self):
         self._constraints = []
 
+        print("Creating constraints...")
+
         DLkis = gen_DLki_mat()
-        Ds = []
 
         for d in range(self._dof):
+            # semi-definite
             D = np.zeros((6, 6))
-            #D1 = sympy.Matrix(np.zeros((6, 6)))
             for i in range(10):
                 D += DLkis[i] * self._x[d * 10 + i]
-                # += sympy.Matrix(DLkis[i]) * self._param[d * 10 + i]
-            #print(D1)
-            # semi-definite constraint
+
             self._constraints.append(D >> np.identity(6) * small_positive_num)
-            # reasonable
 
+            if len(self._value_constraints) != 0:
+                # constraint order: (min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z)
+                min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z = self._value_constraints[d]
 
-        # i = 0
-        # while i < self._n:
+                # mass
+                self._constraints.append(self._x[d * 10 + 9] >= min_m)
+                self._constraints.append(self._x[d * 10 + 9] <= max_m)
 
-            # generalized_inertia = cp.Variable((6, 6))
-            #
-            # # symetric
-            # self._constraints.append(generalized_inertia == generalized_inertia.T)
-            #
-            # # L
-            # self._constraints.append(generalized_inertia[0, 0] == self._x[i])
-            # self._constraints.append(generalized_inertia[0, 1] == self._x[i + 1])
-            # self._constraints.append(generalized_inertia[0, 2] == self._x[i + 2])
-            # self._constraints.append(generalized_inertia[1, 1] == self._x[i + 3])
-            # self._constraints.append(generalized_inertia[1, 2] == self._x[i + 4])
-            # self._constraints.append(generalized_inertia[2, 2] == self._x[i + 5])
-            #
-            # # l
-            # self._constraints.append(generalized_inertia[0, 3] == 0)
-            # self._constraints.append(generalized_inertia[0, 4] == self._x[i + 8])
-            # self._constraints.append(generalized_inertia[0, 5] == -self._x[i + 7])
-            # self._constraints.append(generalized_inertia[1, 3] == -self._x[i + 8])
-            # self._constraints.append(generalized_inertia[1, 4] == 0)
-            # self._constraints.append(generalized_inertia[1, 5] == self._x[i + 6])
-            # self._constraints.append(generalized_inertia[2, 3] == self._x[i + 7])
-            # self._constraints.append(generalized_inertia[2, 4] == -self._x[i + 6])
-            # self._constraints.append(generalized_inertia[2, 5] == 0)
-            #
-            # # m
-            # self._constraints.append(generalized_inertia[3, 3] == self._x[i + 9])
-            # self._constraints.append(generalized_inertia[3, 4] == 0)
-            # self._constraints.append(generalized_inertia[3, 5] == 0)
-            # self._constraints.append(generalized_inertia[4, 4] == self._x[i + 9])
-            # self._constraints.append(generalized_inertia[4, 5] == 0)
-            # self._constraints.append(generalized_inertia[5, 5] == self._x[i + 9])
-            #
-            # # Semi-definite
-            # self._constraints.append(generalized_inertia >> np.identity(6)*small_positive_num)
+                # mass of center position
+                # x
+                self._constraints.append(self._x[d * 10 + 6] >= min_x * self._x[d * 10 + 9])
+                self._constraints.append(self._x[d * 10 + 6] <= max_x * self._x[d * 10 + 9])
+                # y
+                self._constraints.append(self._x[d * 10 + 7] >= min_y * self._x[d * 10 + 9])
+                self._constraints.append(self._x[d * 10 + 7] <= max_y * self._x[d * 10 + 9])
+                # z
+                self._constraints.append(self._x[d * 10 + 8] >= min_z * self._x[d * 10 + 9])
+                self._constraints.append(self._x[d * 10 + 8] <= max_z * self._x[d * 10 + 9])
 
-            # i += 10
 
 
     def solve(self):

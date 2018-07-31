@@ -40,6 +40,6 @@ def get_rbt_def_test_suite():
     return suite
 
 
-rbt_def_test_suite = get_rbt_def_test_suite()
-
-unittest.TextTestRunner(verbosity=2).run(rbt_def_test_suite)
+if __name__ == '__main__':
+    rbt_def_test_suite = get_rbt_def_test_suite()
+    unittest.TextTestRunner(verbosity=2).run(rbt_def_test_suite)

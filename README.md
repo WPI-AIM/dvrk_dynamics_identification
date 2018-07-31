@@ -41,7 +41,7 @@ to solve the dynamics model identification of it. This software framework was de
 * Python modules
     * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt
 
-## Example
+## Application and example
 
 
 ## Author
@@ -49,8 +49,8 @@ Yan Wang, Radian
 
 ## Reference
 When developing this work, we referred a lot from the following places:
-* https://github.com/cdsousa/SymPyBotics
-* https://github.com/kjyv/FloBaRoID
+* [SymPyBotics](https://github.com/cdsousa/SymPyBotics)
+* [FloBaRoID](https://github.com/kjyv/FloBaRoID)
 
 ## Some problems
 When I was using PyOpt, I found some problems with it. In pySLSQP.py file, these changes should be done.
