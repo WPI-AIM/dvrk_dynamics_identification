@@ -1,7 +1,7 @@
 import numpy as np
 
 
-verbose = True
+verbose = False
 
 if verbose:
     def vprint(*args):
