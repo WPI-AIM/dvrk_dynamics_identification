@@ -39,6 +39,7 @@ if verbose:
 else:
     vprint = lambda *a: None      # do-nothing function
 
+
 class RobotDef:
     def __init__(self, params, dh_convention='mdh', friction_type=['viscous']):
 
@@ -75,7 +76,7 @@ class RobotDef:
                 if s not in self.coordinates:
                     self.coordinates += [s]
         self.dof = len(self.coordinates)
-        print(self.coordinates)
+        vprint(self.coordinates)
 
         self.d_coordinates = [new_sym('d'+co.name) for co in self.coordinates]
         self.dd_coordinates = [new_sym('dd' + co.name) for co in self.coordinates]
@@ -104,15 +105,20 @@ class RobotDef:
 
     def _gen_dh_transfm(self):
         self.dh_T = []
+        self.joint_type = []
         for num in self.link_nums:
             subs_dh = [(_dh_alpha, self.dh_alpha[num]), (_dh_a, self.dh_a[num]), (_dh_d, self.dh_d[num]), (_dh_theta, self.dh_theta[num])]
             self.dh_T.append(self._dh_transmat.subs(subs_dh))
+
+            if len(sympy.Matrix([self.dh_d[num]]).free_symbols) > 0:
+                self.joint_type.append("P")  # Prismatic
+            elif len(sympy.Matrix([self.dh_theta[num]]).free_symbols) > 0:
+                self.joint_type.append("R")  # Revolute
+            else:
+                self.joint_type.append("A")  # Assitive
         #print(self.dh_T)
 
     def _gen_params(self):
-        self.std_params = []
-        self.bary_params = []
-
         self.m = list(range(self.frame_num))
         self.l = list(range(self.frame_num))
         self.r = list(range(self.frame_num))
@@ -152,18 +158,30 @@ class RobotDef:
         vprint(self.I_vec, self.L_vec)
 
     def _dyn_params(self):
-        self.params = []
+        self.std_params = []
+        self.bary_params = []
 
         for num in self.link_nums[1:]:
-            self.params += self.L_vec[num]
-            self.params += self.l[num]
-            self.params += [self.m[num]]
+            self.bary_params += self.L_vec[num]
+            self.bary_params += self.l[num]
+            self.bary_params += [self.m[num]]
+
+            self.std_params += self.I_vec[num]
+            self.std_params += self.r[num]
+            self.std_params += [self.m[num]]
 
             if 'Coulomb' in self.friction_type:
-                self.params += [self.Fc[num]]
+                self.bary_params += [self.Fc[num]]
+                self.std_params += [self.Fc[num]]
             if 'viscous' in self.friction_type:
-                self.params += [self.Fv[num]]
+                self.bary_params += [self.Fv[num]]
+                self.std_params += [self.Fv[num]]
             if 'offset' in self.friction_type:
-                self.params += [self.Fo[num]]
+                self.bary_params += [self.Fo[num]]
+                self.std_params += [self.Fo[num]]
 
-        vprint(self.params)
+        vprint("Barycentric parameters:")
+        vprint(sympy.Matrix(self.bary_params))
+
+        vprint("Standard parameters:")
+        vprint(sympy.Matrix(self.std_params))

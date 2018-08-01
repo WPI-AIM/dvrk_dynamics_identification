@@ -23,12 +23,12 @@ class TrajOptimizer:
         self._dyn = dyn
         self._joint_constraints = joint_constraints
         self._joint_const_num = len(self._joint_constraints)
-        print('joint constraint number: ', self._joint_const_num)
+        print('joint constraint number: {}'.format(self._joint_const_num))
         self._cartesian_constraints = cartesian_constraints
         self._cartesian_const_num = len(self._cartesian_constraints)
-        print('cartisian constraint number: ', self._cartesian_const_num)
+        print('cartisian constraint number: {}'.format(self._cartesian_const_num))
         self._const_num = self._joint_const_num * 4 + self._cartesian_const_num * 6
-        print('constraint number: ', self._const_num)
+        print('constraint number: {}'.format(self._const_num))
 
         self._q0_min = q0_min
         self._q0_max = q0_max
@@ -133,8 +133,8 @@ class TrajOptimizer:
         self._add_obj2prob()
         self._add_const2prob()
 
-        print(self._opt_prob)
-        x = np.random.random((self._dyn.rbt_def.dof * (2*self._order+1)))
+        # print(self._opt_prob)
+        #x = np.random.random((self._dyn.rbt_def.dof * (2*self._order+1)))
         #print(self._obj_func(x))
         slsqp = pyOpt.pySLSQP.SLSQP()
 
@@ -145,8 +145,8 @@ class TrajOptimizer:
         self.f_result = fstr
         self.x_result = xstr
 
-        print('fstr: ', fstr)
-        print('xstr: ', xstr)
-        print('inform: ', inform)
+        print('Condition number: {}'.format(fstr[0]))
+        print('x: {}'.format(xstr))
+        #print('inform: ', inform)
 
         print self._opt_prob.solution(0)

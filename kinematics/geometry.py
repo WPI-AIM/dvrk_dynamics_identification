@@ -6,7 +6,7 @@ from frame_drawer import FrameDrawer
 from utils import tranlation_transfmat, so32vec
 
 
-verbose = True
+verbose = False
 
 if verbose:
     def vprint(*args):

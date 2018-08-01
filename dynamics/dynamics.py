@@ -8,6 +8,18 @@ from dyn_param_dep import find_dyn_parm_deps
 from sympy import pprint
 import time
 
+verbose = False
+
+if verbose:
+    def vprint(*args):
+        # vprint each argument separately so caller doesn't need to
+        # stuff everything to be printed into a single string
+        for arg in args:
+           print arg,
+        print
+else:
+    vprint = lambda *a: None      # do-nothing function
+
 
 class Dynamics:
     def __init__(self, rbt_def, geom, g=[0, 0, -9.81], verbose=False):
@@ -27,6 +39,7 @@ class Dynamics:
         return sympy.Matrix(L - m * vec2so3(r).transpose() * vec2so3(r))
 
     def _calc_dyn(self):
+        print("Calculating Lagrangian...")
         # Calculate kinetic energy and potential energy
         p_e = 0
         k_e = 0
@@ -37,98 +50,122 @@ class Dynamics:
             k_e_n = self.rbt_def.m[num] * self._geom.v_cw[num].dot(self._geom.v_cw[num])/2 +\
                    (self._geom.w_b[num].transpose() * self.rbt_def.I_by_Llm[num] * self._geom.w_b[num])[0, 0]/2
             k_e_n = sympy.simplify(k_e_n)
-            print('k_e:', k_e_n)
+            vprint('k_e:', k_e_n)
             k_e += k_e_n
 
         # Lagrangian
         L = k_e - p_e
 
         tau = []
-        print(len(self.rbt_def.coordinates))
+        vprint(len(self.rbt_def.coordinates))
+
+        print("Calculating joint torques...")
         for q, dq in zip(self.rbt_def.coordinates, self.rbt_def.d_coordinates):
             dk_ddq = sympy.diff(k_e, dq)
             dk_ddq_t = dk_ddq.subs(self.rbt_def.subs_q2qt + self.rbt_def.subs_dq2dqt)
             dk_ddq_dtt = sympy.diff(dk_ddq_t, sympy.Symbol('t'))
-            print('dk_ddq_dtt:')
-            print(dk_ddq_dtt)
+            vprint('dk_ddq_dtt:')
+            vprint(dk_ddq_dtt)
             dk_ddq_dt = dk_ddq_dtt.subs(self.rbt_def.subs_ddqt2ddq + self.rbt_def.subs_dqt2dq + self.rbt_def.subs_qt2q)
-            print('dk_ddq_dt:')
-            print(dk_ddq_dt)
+            vprint('dk_ddq_dt:')
+            vprint(dk_ddq_dt)
 
             dL_dq = sympy.diff(L, q)
-            print('dL_dq:')
-            print(dL_dq)
+            vprint('dL_dq:')
+            vprint(dL_dq)
 
             tau.append(sympy.simplify(dk_ddq_dt - dL_dq))
-        print('tau: ')
-        print(tau)
+
+        print("Adding frictions...")
+        for i in range(self.rbt_def.frame_num):
+            q = None
+            if self.rbt_def.joint_type[i] == "P":
+                q = self.rbt_def.dh_d[i]
+            elif self.rbt_def.joint_type[i] == "R":
+                q = self.rbt_def.dh_theta[i]
+            else:
+                continue
+
+            # qt = q.subs(self.rbt_def.subs_q2qt)
+            # dqt = sympy.diff(qt, sympy.Symbol('t'))
+            # dq = dqt.subs(self.rbt_def.subs_dqt2dq)
+            # for i in range(self.rbt_def.frame_num):
+            #     sympy.sign()
+
+
+        vprint('tau: ')
+        vprint(tau)
+
         self.tau = tau
 
     def _calc_regressor(self):
-        A, b = sympy.linear_eq_to_matrix(self.tau, self.rbt_def.params)
-        print('A:')
-        print(A)
-        print(A.shape)
+        print("Calculating gregressor...")
+        A, b = sympy.linear_eq_to_matrix(self.tau, self.rbt_def.bary_params)
+        vprint('A:')
+        vprint(A)
+        vprint(A.shape)
         self.H = A
-        print('b:')
-        print(b)
-        print('Ax - b:')
-        print(sympy.simplify(A*sympy.Matrix(self.rbt_def.params) - sympy.Matrix(self.tau)))
+        vprint('b:')
+        vprint(b)
+        vprint('Ax - b:')
+        vprint(sympy.simplify(A*sympy.Matrix(self.rbt_def.bary_params) - sympy.Matrix(self.tau)))
 
         input_vars = tuple(self.rbt_def.coordinates + self.rbt_def.d_coordinates + self.rbt_def.dd_coordinates)
-        print('input_vars', input_vars)
+        vprint('input_vars', input_vars)
         self.H_func = sympy.lambdify(input_vars, self.H)
-        print(self.H_func)
+        vprint(self.H_func)
         start_time = time.time()
-        print(self.H_func(*np.random.random_sample((len(input_vars),))))
-        print('time: ', time.time() - start_time)
+        vprint(self.H_func(*np.random.random_sample((len(input_vars),))))
+        vprint('time: ', time.time() - start_time)
 
     def _calc_base_param(self):
-        r, P_X, P = find_dyn_parm_deps(len(self.rbt_def.coordinates), len(self.rbt_def.params), self.H_func)
+        print("Calculating base parameter...")
+        r, P_X, P = find_dyn_parm_deps(len(self.rbt_def.coordinates), len(self.rbt_def.bary_params), self.H_func)
         self.base_num = r
-        print('base number: ', self.base_num)
-        self.base_param = P_X.dot(np.matrix(self.rbt_def.params).transpose())
-        print('base parameters: ', self.base_param)
-        print(P)
+        vprint('base number: ', self.base_num)
+        self.base_param = P_X.dot(np.matrix(self.rbt_def.bary_params).transpose())
+        vprint('base parameters: ', self.base_param)
+        vprint(P)
         P_b = P[:r].tolist()
-        print(type(P_b))
-        print(self.H)
+        vprint(type(P_b))
+        vprint(self.H)
 
         self.H_b = self.H[:, P_b]
-        print('H_b: ', self.H_b)
+        vprint('H_b: ', self.H_b)
 
-        print('error: ', sympy.simplify(self.H * np.matrix(self.rbt_def.params).transpose() - self.H_b * self.base_param))
+        vprint('error: ', sympy.simplify(self.H * np.matrix(self.rbt_def.bary_params).transpose() - self.H_b * self.base_param))
 
         input_vars = tuple(self.rbt_def.coordinates + self.rbt_def.d_coordinates + self.rbt_def.dd_coordinates)
-        print('input_vars', input_vars)
+        vprint('input_vars', input_vars)
         self.H_b_func = sympy.lambdify(input_vars, self.H_b)
 
     def _calc_M(self):
         A, b = sympy.linear_eq_to_matrix(self.tau, self.rbt_def.dd_coordinates)
-        print('dd:', self.rbt_def.dd_coordinates)
-        print('tau:')
-        print(A[0, :])
-        print(A[1, :])
+        vprint('dd:', self.rbt_def.dd_coordinates)
+        vprint('tau:')
+        vprint(A[0, :])
+        vprint(A[1, :])
         self.M = A
-        print('M:')
-        print(self.M.shape)
-        print(A)
+        vprint('M:')
+        vprint(self.M.shape)
+        vprint(A)
 
 
     def _calc_G(self):
         subs_qdq2zero = [(dq, 0) for dq in self.rbt_def.d_coordinates]
         subs_qdq2zero += [(ddq, 0) for ddq in self.rbt_def.dd_coordinates]
         self.G = sympy.Matrix(self.tau).subs(subs_qdq2zero)
-        print('G:')
-        print(self.G)
+        vprint('G:')
+        vprint(self.G)
 
     def _calc_C(self):
         subs_ddq2zero = [(ddq, 0) for ddq in self.rbt_def.dd_coordinates]
         self.C = sympy.Matrix(self.tau).subs(subs_ddq2zero) - self.G
-        print('C:')
-        print(self.C)
+        vprint('C:')
+        vprint(self.C)
 
     def _calc_MCG(self):
+        print("Calculating M, C and G...")
         self._calc_M()
         self._calc_G()
         self._calc_C()
