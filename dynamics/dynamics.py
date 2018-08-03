@@ -8,6 +8,7 @@ from dyn_param_dep import find_dyn_parm_deps
 from sympy import pprint
 import time
 
+
 verbose = False
 
 if verbose:
@@ -31,6 +32,8 @@ class Dynamics:
         self._calc_regressor()
         self._calc_MCG()
         self._calc_base_param()
+
+        print("Finished creating robot dynamics")
 
     def _ml2r(self, m, l):
         return sympy.Matrix(l) / m
@@ -79,6 +82,7 @@ class Dynamics:
         print("Adding frictions...")
         for i in range(self.rbt_def.frame_num):
             q = None
+            print("Joint {} type: {}".format(i, self.rbt_def.joint_type[i]))
             if self.rbt_def.joint_type[i] == "P":
                 q = self.rbt_def.dh_d[i]
             elif self.rbt_def.joint_type[i] == "R":
@@ -86,11 +90,15 @@ class Dynamics:
             else:
                 continue
 
-            # qt = q.subs(self.rbt_def.subs_q2qt)
-            # dqt = sympy.diff(qt, sympy.Symbol('t'))
-            # dq = dqt.subs(self.rbt_def.subs_dqt2dq)
-            # for i in range(self.rbt_def.frame_num):
-            #     sympy.sign()
+            qt = q.subs(self.rbt_def.subs_q2qt)
+            dqt = sympy.diff(qt, sympy.Symbol('t'))
+            dq = dqt.subs(self.rbt_def.subs_dqt2dq)
+
+            tau_f = sympy.sign(dq) * self.rbt_def.Fc[i] + dq * self.rbt_def.Fv[i] + self.rbt_def.Fo[i]
+            for a in range(len(self.rbt_def.d_coordinates)):
+                dq_da = sympy.diff(dq, self.rbt_def.d_coordinates[a])
+                tau[a] += dq_da * tau_f
+                print("dq{}_da{} = {}, tau_f = {}".format(i, a, dq_da, tau_f))
 
 
         vprint('tau: ')
@@ -122,9 +130,9 @@ class Dynamics:
         print("Calculating base parameter...")
         r, P_X, P = find_dyn_parm_deps(len(self.rbt_def.coordinates), len(self.rbt_def.bary_params), self.H_func)
         self.base_num = r
-        vprint('base number: ', self.base_num)
+        print('base parameter number: {}'.format(self.base_num))
         self.base_param = P_X.dot(np.matrix(self.rbt_def.bary_params).transpose())
-        vprint('base parameters: ', self.base_param)
+        vprint('base parameters: {}'.format(self.base_param))
         vprint(P)
         P_b = P[:r].tolist()
         vprint(type(P_b))
@@ -133,10 +141,11 @@ class Dynamics:
         self.H_b = self.H[:, P_b]
         vprint('H_b: ', self.H_b)
 
-        vprint('error: ', sympy.simplify(self.H * np.matrix(self.rbt_def.bary_params).transpose() - self.H_b * self.base_param))
+        #vprint('error: ', sympy.simplify(self.H * np.matrix(self.rbt_def.bary_params).transpose() - self.H_b * self.base_param))
 
         input_vars = tuple(self.rbt_def.coordinates + self.rbt_def.d_coordinates + self.rbt_def.dd_coordinates)
         vprint('input_vars', input_vars)
+        print("Creating H_b function...")
         self.H_b_func = sympy.lambdify(input_vars, self.H_b)
 
     def _calc_M(self):
