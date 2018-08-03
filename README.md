@@ -19,16 +19,15 @@ to solve the dynamics model identification of it. This software framework was de
 * Identification
     * Ordinary Least Square (OLS)
     * Weighted Least Square (WLS)
-### Yet to be done
     * Semi-definite Programming (SDP)
-
+### Yet to be done
 
 * Excitation of robots, using dvrk ROS library
 * Output of the identified paramters
 * Output of C++ or Python code of identified dynamic model for control use 
 
 ### Another to-do list
-* Add friction parameters into dynamic model
+* ~~Add friction parameters into dynamic model~~
 * Add Cartisian constraints in optimal excitation trajectory generation
 * Add constraints of mass, center of mass and friction in SDP
 * Save and load parameters for each step to avoid repetitive work every time
