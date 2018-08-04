@@ -48,11 +48,19 @@ class Dynamics:
         k_e = 0
 
         for num in self.rbt_def.link_nums[1:]:
-            p_e += -self.rbt_def.m[num] * self._geom.p_c[num].dot(self._g)
+            k_e_n = 0
+            if self.rbt_def.use_inertia[num]:
+                p_e += -self.rbt_def.m[num] * self._geom.p_c[num].dot(self._g)
 
-            k_e_n = self.rbt_def.m[num] * self._geom.v_cw[num].dot(self._geom.v_cw[num])/2 +\
-                   (self._geom.w_b[num].transpose() * self.rbt_def.I_by_Llm[num] * self._geom.w_b[num])[0, 0]/2
-            k_e_n = sympy.simplify(k_e_n)
+                k_e_n = self.rbt_def.m[num] * self._geom.v_cw[num].dot(self._geom.v_cw[num])/2 +\
+                       (self._geom.w_b[num].transpose() * self.rbt_def.I_by_Llm[num] * self._geom.w_b[num])[0, 0]/2
+                k_e_n = sympy.simplify(k_e_n)
+
+            # if self.rbt_def.use_Ia[num]:
+            #     k_m = self.rbt_def.Ia[num] * self.rbt_def.dq_for_frame[num]**2 / 2
+            #     print("k_m: {}".format(k_m))
+            #     k_e_n += k_m
+
             vprint('k_e:', k_e_n)
             k_e += k_e_n
 
@@ -81,18 +89,7 @@ class Dynamics:
 
         print("Adding frictions...")
         for i in range(self.rbt_def.frame_num):
-            q = None
-            print("Joint {} type: {}".format(i, self.rbt_def.joint_type[i]))
-            if self.rbt_def.joint_type[i] == "P":
-                q = self.rbt_def.dh_d[i]
-            elif self.rbt_def.joint_type[i] == "R":
-                q = self.rbt_def.dh_theta[i]
-            else:
-                continue
-
-            qt = q.subs(self.rbt_def.subs_q2qt)
-            dqt = sympy.diff(qt, sympy.Symbol('t'))
-            dq = dqt.subs(self.rbt_def.subs_dqt2dq)
+            dq = self.rbt_def.dq_for_frame[i]
 
             tau_f = sympy.sign(dq) * self.rbt_def.Fc[i] + dq * self.rbt_def.Fv[i] + self.rbt_def.Fo[i]
             for a in range(len(self.rbt_def.d_coordinates)):
@@ -100,6 +97,8 @@ class Dynamics:
                 tau[a] += dq_da * tau_f
                 print("dq{}_da{} = {}, tau_f = {}".format(i, a, dq_da, tau_f))
 
+            # if self.rbt_def.use_Ia[i]:
+            #     tau[i]
 
         vprint('tau: ')
         vprint(tau)
