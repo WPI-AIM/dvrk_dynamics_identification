@@ -51,6 +51,8 @@ class RobotDef:
         self.dh_alpha = [p[4] for p in params]
         self.dh_d = [p[5] for p in params]
         self.dh_theta = [p[6] for p in params]
+        self.use_inertia = [p[7] for p in params]
+        self.use_Ia = [p[8] for p in params]
         self.dh_convention = dh_convention
         if self.dh_convention in ['sdh', 'std']:
             self._dh_transmat = _standard_dh_transfmat
@@ -103,6 +105,22 @@ class RobotDef:
         self.subs_ddqt2ddq = [(ddqt, ddq) for ddq, ddqt in zip(self.dd_coordinates, self.dd_coordinates_t)]
         vprint(self.subs_ddq2ddqt)
 
+        self.dq_for_frame = list(range(self.frame_num))
+        for i in range(self.frame_num):
+            q = None
+            if self.joint_type[i] == "P":
+                q = self.dh_d[i]
+            elif self.joint_type[i] == "R":
+                q = self.dh_theta[i]
+            else:
+                continue
+
+            qt = q.subs(self.subs_q2qt)
+            dqt = sympy.diff(qt, sympy.Symbol('t'))
+            dq = dqt.subs(self.subs_dqt2dq)
+
+            self.dq_for_frame[i] = dq
+
     def _gen_dh_transfm(self):
         self.dh_T = []
         self.joint_type = []
@@ -131,6 +149,7 @@ class RobotDef:
         self.Fc = list(range(self.frame_num))
         self.Fv = list(range(self.frame_num))
         self.Fo = list(range(self.frame_num))
+        self.Ia = list(range(self.frame_num))
 
         for num in self.link_nums[1:]:
             self.m[num] = new_sym('m'+str(num))
@@ -152,6 +171,9 @@ class RobotDef:
             if 'offset' in self.friction_type:
                 self.Fo[num] = new_sym('Fo' + str(num))
 
+            if self.use_Ia:
+                self.Ia[num] = new_sym('Ia' + str(num))
+
         vprint(self.m)
         vprint(self.l)
         vprint(self.r)
@@ -162,13 +184,14 @@ class RobotDef:
         self.bary_params = []
 
         for num in self.link_nums[1:]:
-            self.bary_params += self.L_vec[num]
-            self.bary_params += self.l[num]
-            self.bary_params += [self.m[num]]
+            if self.use_inertia[num]:
+                self.bary_params += self.L_vec[num]
+                self.bary_params += self.l[num]
+                self.bary_params += [self.m[num]]
 
-            self.std_params += self.I_vec[num]
-            self.std_params += self.r[num]
-            self.std_params += [self.m[num]]
+                self.std_params += self.I_vec[num]
+                self.std_params += self.r[num]
+                self.std_params += [self.m[num]]
 
             if 'Coulomb' in self.friction_type:
                 self.bary_params += [self.Fc[num]]
@@ -179,6 +202,10 @@ class RobotDef:
             if 'offset' in self.friction_type:
                 self.bary_params += [self.Fo[num]]
                 self.std_params += [self.Fo[num]]
+
+            if self.use_Ia[num]:
+                self.bary_params += [self.Ia[num]]
+                self.std_params += [self.Ia[num]]
 
         vprint("Barycentric parameters:")
         vprint(sympy.Matrix(self.bary_params))
