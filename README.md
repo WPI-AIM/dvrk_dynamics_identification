@@ -28,7 +28,7 @@ to solve the dynamics model identification of it. This software framework was de
 
 ### Another to-do list
 * ~~Add friction parameters into dynamic model~~
-* Add Cartisian constraints in optimal excitation trajectory generation
+* Add Cartisian constraints in optimal excitation trajectory generation  (check if it works)
 * ~~Add constraints of mass, center of mass and friction in SDP~~
 * Save and load parameters for each step to avoid repetitive work every time
 * Regularize output print
