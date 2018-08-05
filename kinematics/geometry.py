@@ -23,6 +23,7 @@ class Geometry:
     def __init__(self, rbt_def):
         self.rbt_df = rbt_def
         self._cal_geom()
+        self._calc_functions()
         # self.draw_geom()
 
     def _cal_geom(self):
@@ -68,6 +69,14 @@ class Geometry:
         vprint(self.v_cw)
         vprint('w_b')
         vprint(self.w_b)
+
+    def _calc_functions(self):
+        self.p_n_func = ["" for x in range(self.rbt_df.frame_num)]
+        #self.p_n_func = np.zeros(self.rbt_df.dof)
+        input_vars = tuple(self.rbt_df.coordinates)
+
+        for num in range(self.rbt_df.frame_num):
+            self.p_n_func[num] = sympy.lambdify(input_vars, self.p_n[num])
 
     def draw_geom(self):
         frame_drawer = FrameDrawer((-0.6, 0.2), (-0.6, 0.6), (-0.6, 0.2))

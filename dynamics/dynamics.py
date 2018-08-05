@@ -25,7 +25,7 @@ else:
 class Dynamics:
     def __init__(self, rbt_def, geom, g=[0, 0, -9.81], verbose=False):
         self.rbt_def = rbt_def
-        self._geom = geom
+        self.geom = geom
         self._g = np.matrix(g)
 
         self._calc_dyn()
@@ -50,10 +50,10 @@ class Dynamics:
         for num in self.rbt_def.link_nums[1:]:
             k_e_n = 0
             if self.rbt_def.use_inertia[num]:
-                p_e += -self.rbt_def.m[num] * self._geom.p_c[num].dot(self._g)
+                p_e += -self.rbt_def.m[num] * self.geom.p_c[num].dot(self._g)
 
-                k_e_n = self.rbt_def.m[num] * self._geom.v_cw[num].dot(self._geom.v_cw[num])/2 +\
-                       (self._geom.w_b[num].transpose() * self.rbt_def.I_by_Llm[num] * self._geom.w_b[num])[0, 0]/2
+                k_e_n = self.rbt_def.m[num] * self.geom.v_cw[num].dot(self.geom.v_cw[num])/2 +\
+                       (self.geom.w_b[num].transpose() * self.rbt_def.I_by_Llm[num] * self.geom.w_b[num])[0, 0]/2
                 k_e_n = sympy.simplify(k_e_n)
 
             # if self.rbt_def.use_Ia[num]:
@@ -122,7 +122,7 @@ class Dynamics:
         vprint(sympy.simplify(A*sympy.Matrix(self.rbt_def.bary_params) - sympy.Matrix(self.tau)))
 
         input_vars = tuple(self.rbt_def.coordinates + self.rbt_def.d_coordinates + self.rbt_def.dd_coordinates)
-        vprint('input_vars', input_vars)
+        print('input_vars', input_vars)
         self.H_func = sympy.lambdify(input_vars, self.H)
         vprint(self.H_func)
         start_time = time.time()

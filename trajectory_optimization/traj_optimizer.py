@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from fourier_traj import FourierTraj
 
+import sympy
 
 q0_scale = np.pi
 fourier_scale = 1
@@ -89,9 +90,30 @@ class TrajOptimizer:
         #print('constraints number: ', g_cnt)
         # Cartesian Constraints
 
-        # fail
-        fail = 0
+        # print(q.shape[0])
+        for c_c in self._cartesian_constraints:
+            frame_num, bool_max, c_x, c_y, c_z = c_c
 
+            for num in range(q.shape[0]):
+                vars_input = q[num, :].tolist()
+                p_num = self._dyn.geom.p_n_func[frame_num](*vars_input)
+
+                if bool_max:
+                    g[g_cnt] = p_num[0, 0] - c_x
+                    g_cnt += 1
+                    g[g_cnt] = p_num[1, 0] - c_y
+                    g_cnt += 1
+                    g[g_cnt] = p_num[2, 0] - c_z
+                    g_cnt += 1
+                else:
+                    g[g_cnt] = -p_num[0, 0] + c_x
+                    g_cnt += 1
+                    g[g_cnt] = -p_num[1, 0] + c_y
+                    g_cnt += 1
+                    g[g_cnt] = -p_num[2, 0] + c_z
+                    g_cnt += 1
+
+        fail = 0
         return f, g, fail
 
     def _add_obj2prob(self):
