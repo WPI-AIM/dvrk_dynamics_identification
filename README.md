@@ -32,7 +32,7 @@ to solve the dynamics model identification of it. This software framework was de
 * ~~Add constraints of mass, center of mass and friction in SDP~~
 * Save and load parameters for each step to avoid repetitive work every time
 * Regularize output print
-* Add motor inertia
+* ~~Add motor inertia~~
 * Add spring parameters into dynamics model 
 * Optimize the code to make it faster
 

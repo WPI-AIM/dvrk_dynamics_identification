@@ -87,18 +87,22 @@ class Dynamics:
 
             tau.append(sympy.simplify(dk_ddq_dt - dL_dq))
 
-        print("Adding frictions...")
+        print("Adding frictions and motor rotor inertia...")
         for i in range(self.rbt_def.frame_num):
             dq = self.rbt_def.dq_for_frame[i]
 
-            tau_f = sympy.sign(dq) * self.rbt_def.Fc[i] + dq * self.rbt_def.Fv[i] + self.rbt_def.Fo[i]
-            for a in range(len(self.rbt_def.d_coordinates)):
-                dq_da = sympy.diff(dq, self.rbt_def.d_coordinates[a])
-                tau[a] += dq_da * tau_f
-                print("dq{}_da{} = {}, tau_f = {}".format(i, a, dq_da, tau_f))
+            if self.rbt_def.use_friction[i]:
+                tau_f = sympy.sign(dq) * self.rbt_def.Fc[i] + dq * self.rbt_def.Fv[i] + self.rbt_def.Fo[i]
+                for a in range(len(self.rbt_def.d_coordinates)):
+                    dq_da = sympy.diff(dq, self.rbt_def.d_coordinates[a])
+                    tau[a] += dq_da * tau_f
+                    # print("dq{}_da{} = {}, tau_f = {}".format(i, a, dq_da, tau_f))
 
-            # if self.rbt_def.use_Ia[i]:
-            #     tau[i]
+            if self.rbt_def.use_Ia[i]:
+                tau_Ia = self.rbt_def.ddq_for_frame[i] * self.rbt_def.Ia[i]
+                tau_index = self.rbt_def.dd_coordinates.index(self.rbt_def.ddq_for_frame[i])
+                tau[tau_index] += tau_Ia
+                # print("tau_Ia{}: {}".format(tau_index, tau_Ia))
 
         vprint('tau: ')
         vprint(tau)
