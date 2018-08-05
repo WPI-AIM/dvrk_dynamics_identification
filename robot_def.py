@@ -53,6 +53,7 @@ class RobotDef:
         self.dh_theta = [p[6] for p in params]
         self.use_inertia = [p[7] for p in params]
         self.use_Ia = [p[8] for p in params]
+        self.use_friction = [p[9] for p in params]
         self.dh_convention = dh_convention
         if self.dh_convention in ['sdh', 'std']:
             self._dh_transmat = _standard_dh_transfmat
@@ -106,6 +107,8 @@ class RobotDef:
         vprint(self.subs_ddq2ddqt)
 
         self.dq_for_frame = list(range(self.frame_num))
+        self.ddq_for_frame = list(range(self.frame_num))
+
         for i in range(self.frame_num):
             q = None
             if self.joint_type[i] == "P":
@@ -120,6 +123,12 @@ class RobotDef:
             dq = dqt.subs(self.subs_dqt2dq)
 
             self.dq_for_frame[i] = dq
+
+            ddqt = sympy.diff(dqt, sympy.Symbol('t'))
+            ddq = ddqt.subs(self.subs_ddqt2ddq)
+
+            self.ddq_for_frame[i] = ddq
+
 
     def _gen_dh_transfm(self):
         self.dh_T = []
@@ -171,7 +180,7 @@ class RobotDef:
             if 'offset' in self.friction_type:
                 self.Fo[num] = new_sym('Fo' + str(num))
 
-            if self.use_Ia:
+            if self.use_Ia[num]:
                 self.Ia[num] = new_sym('Ia' + str(num))
 
         vprint(self.m)
@@ -193,15 +202,16 @@ class RobotDef:
                 self.std_params += self.r[num]
                 self.std_params += [self.m[num]]
 
-            if 'Coulomb' in self.friction_type:
-                self.bary_params += [self.Fc[num]]
-                self.std_params += [self.Fc[num]]
-            if 'viscous' in self.friction_type:
-                self.bary_params += [self.Fv[num]]
-                self.std_params += [self.Fv[num]]
-            if 'offset' in self.friction_type:
-                self.bary_params += [self.Fo[num]]
-                self.std_params += [self.Fo[num]]
+            if self.use_friction[num]:
+                if 'Coulomb' in self.friction_type:
+                    self.bary_params += [self.Fc[num]]
+                    self.std_params += [self.Fc[num]]
+                if 'viscous' in self.friction_type:
+                    self.bary_params += [self.Fv[num]]
+                    self.std_params += [self.Fv[num]]
+                if 'offset' in self.friction_type:
+                    self.bary_params += [self.Fo[num]]
+                    self.std_params += [self.Fo[num]]
 
             if self.use_Ia[num]:
                 self.bary_params += [self.Ia[num]]

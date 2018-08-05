@@ -6,14 +6,11 @@ from utils import gen_DLki_mat
 
 
 class SDPOpt:
-    small_positive_num = 0.000001
-    min_Fc = 0.005
-    min_Fv = 0.005
-    min_Ia = 0.005
-
     def __init__(self, W, tau, rbt_def, value_constraints=[]):
-
-        self.min_Ia = 0.0001
+        self.small_positive_num = 0.000001
+        self.min_Fc = 0.005
+        self.min_Fv = 0.005
+        self.min_Ia = 0.02
 
         self._W = W
         self._tau = tau
@@ -86,28 +83,29 @@ class SDPOpt:
 
                     i_param += 10
 
-                # Coulomb friction
-                if 'Coulomb' in self._rbt_def.friction_type:
-                    self._constraints.append(self._x[i_param] >= self.min_Fc)
-                    self._constraints.append(self._x[i_param] <= max_Fc)
-                    i_param += 1
+                if self._rbt_def.use_friction[f]:
+                    # Coulomb friction
+                    if 'Coulomb' in self._rbt_def.friction_type:
+                        self._constraints.append(self._x[i_param] >= self.min_Fc)
+                        self._constraints.append(self._x[i_param] <= max_Fc)
+                        i_param += 1
 
-                # Viscous friction
-                if 'viscous' in self._rbt_def.friction_type:
-                    self._constraints.append(self._x[i_param] >= self.min_Fv)
-                    self._constraints.append(self._x[i_param] <= max_Fv)
-                    i_param += 1
+                    # Viscous friction
+                    if 'viscous' in self._rbt_def.friction_type:
+                        self._constraints.append(self._x[i_param] >= self.min_Fv)
+                        self._constraints.append(self._x[i_param] <= max_Fv)
+                        i_param += 1
 
-                # Coulomb friction offset
-                if 'offset' in self._rbt_def.friction_type:
-                    self._constraints.append(self._x[i_param] <= max_Fo)
-                    self._constraints.append(self._x[i_param] >= -max_Fo)
-                    i_param += 1
+                    # Coulomb friction offset
+                    if 'offset' in self._rbt_def.friction_type:
+                        self._constraints.append(self._x[i_param] <= max_Fo)
+                        self._constraints.append(self._x[i_param] >= -max_Fo)
+                        i_param += 1
 
                 # Inertia of motor
                 if self._rbt_def.use_Ia[f]:
                     print("Ia{} param{}".format(f, i_param+1))
-                    #self._constraints.append(self._x[i_param] >= 1)
+                    self._constraints.append(self._x[i_param] >= self.min_Ia)
                     i_param += 1
 
             else:
