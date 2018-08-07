@@ -44,6 +44,8 @@ class TrajOptimizer:
 
         self._prepare_opt()
 
+        self.frame_pos = np.zeros((self.sample_num,3))
+
     def _prepare_opt(self):
         sample_num = self._order * self._sample_point + 1
         self.sample_num = sample_num
@@ -88,8 +90,9 @@ class TrajOptimizer:
                 g_cnt += 1
         # print('g: ', g)
         #print('constraints number: ', g_cnt)
-        # Cartesian Constraints
 
+
+        # Cartesian Constraints
         # print(q.shape[0])
         for c_c in self._cartesian_constraints:
             frame_num, bool_max, c_x, c_y, c_z = c_c
@@ -98,14 +101,18 @@ class TrajOptimizer:
                 vars_input = q[num, :].tolist()
                 p_num = self._dyn.geom.p_n_func[frame_num](*vars_input)
 
-                if bool_max:
+                self.frame_pos[num, 0] = p_num[0, 0]
+                self.frame_pos[num, 1] = p_num[1, 0]
+                self.frame_pos[num, 2] = p_num[2, 0]
+
+                if bool_max == 'max':
                     g[g_cnt] = p_num[0, 0] - c_x
                     g_cnt += 1
                     g[g_cnt] = p_num[1, 0] - c_y
                     g_cnt += 1
                     g[g_cnt] = p_num[2, 0] - c_z
                     g_cnt += 1
-                else:
+                elif bool_max == 'min':
                     g[g_cnt] = -p_num[0, 0] + c_x
                     g_cnt += 1
                     g[g_cnt] = -p_num[1, 0] + c_y
@@ -113,7 +120,7 @@ class TrajOptimizer:
                     g[g_cnt] = -p_num[2, 0] + c_z
                     g_cnt += 1
 
-        fail = 0
+        fail = 1
         return f, g, fail
 
     def _add_obj2prob(self):

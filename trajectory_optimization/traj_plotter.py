@@ -22,8 +22,10 @@ linestyles = [('solid',               (0, ())),
 
 
 class TrajPlotter:
-    def __init__(self, fourier_traj):
+    def __init__(self, fourier_traj, frame_traj = []):
         self._fourier_traj = fourier_traj
+        self._frame_traj = frame_traj
+        #print(self._frame_traj)
 
     def plot_desired_traj(self, fourier_x):
         x = self._fourier_traj.t
@@ -66,3 +68,17 @@ class TrajPlotter:
 
     def plot_measured_traj(self):
         pass
+
+    def plot_frame_traj(self):
+        x = self._fourier_traj.t
+
+        fig = plt.figure(2)
+        plt_q = fig.add_subplot(311)
+
+        for d in range(3):
+            _, linestyle = linestyles[d]
+            plt_q.plot(x, self._frame_traj[:, d], label='line1', linestyle=linestyle)
+        plt_q.legend()
+
+        plt_q.set_ylabel(r'$q$ (m)')
+        plt.show()
