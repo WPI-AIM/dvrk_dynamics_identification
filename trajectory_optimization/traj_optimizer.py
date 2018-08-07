@@ -45,6 +45,7 @@ class TrajOptimizer:
         self._prepare_opt()
 
         self.frame_pos = np.zeros((self.sample_num,3))
+        self.const_frame_ind = np.array([0])
 
     def _prepare_opt(self):
         sample_num = self._order * self._sample_point + 1
@@ -95,7 +96,12 @@ class TrajOptimizer:
         # Cartesian Constraints
         # print(q.shape[0])
         for c_c in self._cartesian_constraints:
+
             frame_num, bool_max, c_x, c_y, c_z = c_c
+
+            if frame_num not in self.const_frame_ind:
+                self.const_frame_ind = np.append(self.const_frame_ind, frame_num)
+
 
             for num in range(q.shape[0]):
                 vars_input = q[num, :].tolist()

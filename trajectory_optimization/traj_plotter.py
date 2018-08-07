@@ -71,13 +71,15 @@ class TrajPlotter:
 
     def plot_frame_traj(self):
         x = self._fourier_traj.t
+        map = ['x', 'y', 'z']
 
         fig = plt.figure(2)
         plt_q = fig.add_subplot(311)
 
+
         for d in range(3):
             _, linestyle = linestyles[d]
-            plt_q.plot(x, self._frame_traj[:, d], label='line1', linestyle=linestyle)
+            plt_q.plot(x, self._frame_traj[:, d], label=(str(map[d])), linestyle=linestyle)
         plt_q.legend()
 
         plt_q.set_ylabel(r'$q$ (m)')
