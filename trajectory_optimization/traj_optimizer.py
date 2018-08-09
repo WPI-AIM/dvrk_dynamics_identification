@@ -27,7 +27,7 @@ class TrajOptimizer:
         print('joint constraint number: {}'.format(self._joint_const_num))
         self._cartesian_constraints = cartesian_constraints
         self._cartesian_const_num = len(self._cartesian_constraints)
-        print('cartisian constraint number: {}'.format(self._cartesian_const_num))
+        print('cartesian constraint number: {}'.format(self._cartesian_const_num))
         self._const_num = self._joint_const_num * 4 + self._cartesian_const_num * 6
         print('constraint number: {}'.format(self._const_num))
 
@@ -44,9 +44,19 @@ class TrajOptimizer:
 
         self._prepare_opt()
 
-        self.frame_pos = np.zeros((self.sample_num,3))
-        self.const_frame_ind = np.array([0])
+        self.frame_pos = np.zeros((self.sample_num, 3))
+        self.const_frame_ind = np.array([])
 
+        for c_c in self._cartesian_constraints:
+
+            frame_num, bool_max, c_x, c_y, c_z = c_c
+
+            if frame_num not in self.const_frame_ind:
+                self.const_frame_ind = np.append(self.const_frame_ind, frame_num)
+
+        self.frame_traj = np.zeros((len(self.const_frame_ind), self.sample_num, 3))
+
+        print('frames_constrained: {}'.format(self.const_frame_ind))
     def _prepare_opt(self):
         sample_num = self._order * self._sample_point + 1
         self.sample_num = sample_num
@@ -96,12 +106,7 @@ class TrajOptimizer:
         # Cartesian Constraints
         # print(q.shape[0])
         for c_c in self._cartesian_constraints:
-
             frame_num, bool_max, c_x, c_y, c_z = c_c
-
-            if frame_num not in self.const_frame_ind:
-                self.const_frame_ind = np.append(self.const_frame_ind, frame_num)
-
 
             for num in range(q.shape[0]):
                 vars_input = q[num, :].tolist()
@@ -185,3 +190,18 @@ class TrajOptimizer:
         #print('inform: ', inform)
 
         print self._opt_prob.solution(0)
+
+
+    def calc_frame_traj(self):
+
+        q, dq, ddq = self.fourier_traj.fourier_base_x2q(self.x_result)
+        print(self._dyn.geom.p_n_func[int(self.const_frame_ind[0])])
+        for i in range(len(self.const_frame_ind)):
+            for num in range(q.shape[0]):
+                vars_input = q[num, :].tolist()
+                #print(vars_input)
+
+                p_num = self._dyn.geom.p_n_func[int(self.const_frame_ind[i])](*vars_input)
+                print(p_num[:, 0])
+                self.frame_traj[i, num, :] = p_num[:, 0]
+
