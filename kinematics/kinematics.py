@@ -59,7 +59,6 @@ class Kinematics:
         self._subs_dqt2dq = [(dqt, dq) for dq, dqt in zip(self._d_coordinates, self._d_coordinates_t)]
         self._subs_ddqt2ddq = [(ddqt, ddq) for ddq, ddqt in zip(self._dd_coordinates, self._dd_coordinates_t)]
 
-
     def draw_frames(self):
         frame_drawer = FrameDrawer((-0.6, 0.2), (-0.6, 0.6), (-0.6, 0.2))
 

@@ -16,7 +16,7 @@ fourier_scale = 1
 # [(joint_num, x_low, x_high, y_low, y_high, z_low, z_high), ..., (...)]
 
 class TrajOptimizer:
-    def __init__(self, dyn, order, base_freq, joint_constraints=[], cartesian_constraints = [],
+    def __init__(self, dyn, order, base_freq, joint_constraints=[], cartesian_constraints=[],
                  q0_min=-q0_scale, q0_max=q0_scale,
                  ab_min=-fourier_scale, ab_max=fourier_scale, verbose=False):
         self._order = order
