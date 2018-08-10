@@ -22,8 +22,11 @@ linestyles = [('solid',               (0, ())),
 
 
 class TrajPlotter:
-    def __init__(self, fourier_traj):
+    def __init__(self, fourier_traj, frame_traj = [], const_frame_num = []):
         self._fourier_traj = fourier_traj
+        self._frame_traj = frame_traj
+        self._const_frame_ind = const_frame_num
+        #print(self._frame_traj)
 
     def plot_desired_traj(self, fourier_x):
         x = self._fourier_traj.t
@@ -54,7 +57,7 @@ class TrajPlotter:
         # acceleration
         plt_ddq = fig.add_subplot(313)
         for d in range(self._fourier_traj.dof):
-            print('traj:', d)
+            #print('traj:', d)
             _, linestyle = linestyles[d]
             plt_ddq.plot(x, ddq[:, d], label=(r"$\ddot{q}_"+str(d+1)+"$"), linestyle=linestyle)
 
@@ -66,3 +69,24 @@ class TrajPlotter:
 
     def plot_measured_traj(self):
         pass
+
+    def plot_frame_traj(self, argu):
+        x = self._fourier_traj.t
+        map = ['x', 'y', 'z']
+
+        const_size = len(self._const_frame_ind)
+
+        subplotnum = const_size*100 + 11
+
+        fig = plt.figure(2)
+        for i in range(const_size):
+            plt_q = fig.add_subplot(subplotnum + i)
+
+            for d in range(3):
+                _, linestyle = linestyles[d]
+                plt_q.plot(x, self._frame_traj[i, :, d], label=(str(map[d])), linestyle=linestyle)
+
+            plt_q.legend()
+            plt_q.set_ylabel(r'$q$ (m)')
+            plt_q.set_title('Frame ' + str(int(self._const_frame_ind[i]))+ ' Trajectory')
+        plt.show()

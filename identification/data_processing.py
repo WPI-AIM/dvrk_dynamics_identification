@@ -374,20 +374,40 @@ def gen_regressor(param_num, H, q, dq, ddq, tau):
     return W, tau_s
 
 
-def barycentric2standard_params(x, params):
+def barycentric2standard_params(x, rbt_def):
     i = 0
+    i_link = 1
     x_out = []
-    while i < len(params):
-        m = x[i + 9]
-        rx, ry, rz = x[i + 6] / m, x[i + 7] / m, x[i + 8] / m
-        r = [rx, ry, rz]
-        L_mat = inertia_vec2tensor(x[i: i + 6])
-        I_vec = inertia_tensor2vec(Lmr2I(L_mat, m, r))
+    while i < len(rbt_def.bary_param):
+        if rbt_def.use_inertia[i_link]:
+            m = x[i + 9]
+            rx, ry, rz = x[i + 6] / m, x[i + 7] / m, x[i + 8] / m
+            r = [rx, ry, rz]
+            L_mat = inertia_vec2tensor(x[i: i + 6])
+            I_vec = inertia_tensor2vec(Lmr2I(L_mat, m, r))
 
-        print(I_vec, r, m)
-        x_out += I_vec + r + [m]
+            #print(I_vec, r, m)
+            x_out += I_vec + r + [m]
 
-        i += 10
+            i += 10
+        if rbt_def.use_friction[i_link]:
+            if 'Coulomb' in rbt_def.friction_type:
+                x_out += [x[i]]
+                i += 1
+
+            if 'viscous' in rbt_def.friction_type:
+                x_out += [x[i]]
+                i += 1
+
+            if 'offset' in rbt_def.friction_type:
+                x_out += [x[i]]
+                i += 1
+
+        if rbt_def.use_Ia[i_link]:
+            x_out += [x[i]]
+            i += 1
+
+        i_link += 1
 
     return x_out
 
