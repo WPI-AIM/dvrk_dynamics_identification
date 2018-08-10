@@ -17,9 +17,14 @@ class RobotModel:
         self.H_func = dyn.H_func
         self.p_n_func = dyn.geom.p_n_func
 
+        self.frame_num = dyn.rbt_def.frame_num
+        self.use_inertia = dyn.rbt_def.use_inertia
+        self.use_friction = dyn.rbt_def.use_friction
+        self.friction_type = dyn.rbt_def.friction_type
+        self.use_Ia = dyn.rbt_def.use_Ia
         #Problems Loading matrix
         #self.T_0n = dyn.geom.T_0n[3] #Matrix?? 3 sucks
 
-        self.T_0n = dyn.geom.T_0n[2]
+        #self.T_0n = dyn.geom.T_0n
 
 

@@ -1,6 +1,7 @@
 import sympy
 import numpy as np
-
+import cloudpickle as pickle
+import os.path
 
 def new_sym(name):
     return sympy.symbols(name, real=True)
@@ -83,3 +84,14 @@ def gen_DLki_mat():
     M[9][5, 5] = 1
 
     return M
+
+def save_data (folder, name, data):
+    model_file = folder + name + '.pkl'
+    with open(model_file, 'wr') as f:
+        pickle.dump(data, f)
+
+def load_data(folder, name):
+    model_file = folder + name + '.pkl'
+    if os.path.exists(model_file):
+        data = pickle.load(open(model_file, 'rb'))
+    return data

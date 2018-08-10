@@ -39,7 +39,7 @@ class TrajOptimizer:
         # sample number for the highest term
         self._sample_point = 12
 
-        self.fourier_traj = FourierTraj(self._dyn.rbt_def.dof, self._order, self._base_freq,
+        self.fourier_traj = FourierTraj(self._dyn.dof, self._order, self._base_freq,
                                         sample_num_per_period=self._sample_point)
 
         self._prepare_opt()
@@ -64,7 +64,7 @@ class TrajOptimizer:
         period = 1.0/self._base_freq
         t = np.linspace(0, period, num=sample_num)
 
-        self.H = np.zeros((self._dyn.rbt_def.dof * sample_num, self._dyn.base_num))
+        self.H = np.zeros((self._dyn.dof * sample_num, self._dyn.base_num))
 
     def _obj_func(self, x):
         # objective
@@ -75,7 +75,7 @@ class TrajOptimizer:
 
         for n in range(self.sample_num):
             vars_input = q[n, :].tolist() + dq[n, :].tolist() + ddq[n, :].tolist()
-            self.H[n*self._dyn.rbt_def.dof:(n+1)*self._dyn.rbt_def.dof, :] = self._dyn.H_b_func(*vars_input)
+            self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :] = self._dyn.H_b_func(*vars_input)
         # print('H: ', self.H)
 
         f = np.linalg.cond(self.H)
@@ -88,7 +88,7 @@ class TrajOptimizer:
         # Joint constraints
         for j_c in self._joint_constraints:
             q_s, q_l, q_u, dq_l, dq_u = j_c
-            co_num = self._dyn.rbt_def.coordinates.index(q_s)
+            co_num = self._dyn.coordinates.index(q_s)
 
             for qt, dqt in zip(q[:, co_num], dq[:, co_num]):
                 g[g_cnt] = qt - q_u
@@ -110,7 +110,7 @@ class TrajOptimizer:
 
             for num in range(q.shape[0]):
                 vars_input = q[num, :].tolist()
-                p_num = self._dyn.geom.p_n_func[frame_num](*vars_input)
+                p_num = self._dyn.p_n_func[frame_num](*vars_input)
 
                 self.frame_pos[num, 0] = p_num[0, 0]
                 self.frame_pos[num, 1] = p_num[1, 0]
@@ -143,7 +143,7 @@ class TrajOptimizer:
         def rand_local(l, u, scale):
             return (np.random.random() * (u - l)/2 + (u + l)/2) * scale
 
-        for num in range(self._dyn.rbt_def.dof):
+        for num in range(self._dyn.dof):
             # q0
             self._opt_prob.addVar('x'+str(num*joint_coef_num + 1), 'c',
                                   lower=self._q0_min, upper=self._q0_max,
@@ -195,13 +195,13 @@ class TrajOptimizer:
     def calc_frame_traj(self):
 
         q, dq, ddq = self.fourier_traj.fourier_base_x2q(self.x_result)
-        print(self._dyn.geom.p_n_func[int(self.const_frame_ind[0])])
+        #print(self._dyn.p_n_func[int(self.const_frame_ind[0])])
         for i in range(len(self.const_frame_ind)):
             for num in range(q.shape[0]):
                 vars_input = q[num, :].tolist()
                 #print(vars_input)
 
-                p_num = self._dyn.geom.p_n_func[int(self.const_frame_ind[i])](*vars_input)
-                print(p_num[:, 0])
+                p_num = self._dyn.p_n_func[int(self.const_frame_ind[i])](*vars_input)
+                #print(p_num[:, 0])
                 self.frame_traj[i, num, :] = p_num[:, 0]
 
