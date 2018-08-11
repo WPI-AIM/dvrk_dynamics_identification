@@ -28,18 +28,19 @@ to solve the dynamics model identification of it. This software framework was de
 
 ### Another to-do list
 * ~~Add friction parameters into dynamic model~~
-* Add Cartisian constraints in optimal excitation trajectory generation  (check if it works)
+* Add Cartisian constraints in optimal excitation trajectory generation  (DONE)
 * ~~Add constraints of mass, center of mass and friction in SDP~~
-* Save and load parameters for each step to avoid repetitive work every time
+* Save and load parameters for each step to avoid repetitive work every time (DONE)
 * Regularize output print
 * ~~Add motor inertia~~
 * Add spring parameters into dynamics model 
-* Optimize the code to make it faster
+* Optimize the code to make it faster (It's already fast)
+* Hardware Test Publisher and Data Collection
 
 ## Requirements
 * Python 2.7
 * Python modules
-    * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt
+    * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt, cloudpickle
 
 ## Application and example
 
