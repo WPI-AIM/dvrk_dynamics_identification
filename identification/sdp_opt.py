@@ -6,7 +6,7 @@ from utils import gen_DLki_mat
 
 
 class SDPOpt:
-    def __init__(self, W, tau, rbt_def, value_constraints=[]):
+    def __init__(self, W, tau, rbt_def, value_constraints=[], spring_constraints=[]):
         self.small_positive_num = 0.000001
         self.min_Fc = 0.005
         self.min_Fv = 0.005
@@ -29,6 +29,11 @@ class SDPOpt:
                     raise ValueError("Mass constraints should be positive.")
 
         self._value_constraints = value_constraints
+
+        if len(spring_constraints) == self._rbt_def.spring_num:
+            self._spring_constraints = spring_constraints
+        else:
+            raise ValueError("The spring number is not equal to the spring constraint number.")
 
         print("Regressor shape: {}".format(W.shape))
         print("Regressand shape: {}".format(tau.shape))
@@ -127,6 +132,12 @@ class SDPOpt:
                 # Inertia of motor
                 if self._rbt_def.use_Ia[f]:
                     i_param += 1
+
+        # Constraints for spring stiffness
+        for i in range(self._rbt_def.spring_num):
+            self._constraints.append(self._x[i_param] >= self._spring_constraints[i][0])
+            self._constraints.append(self._x[i_param] <= self._spring_constraints[i][1])
+            i_param += 1
 
     def solve(self):
         self._create_var()

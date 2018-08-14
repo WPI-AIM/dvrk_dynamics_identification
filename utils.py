@@ -85,13 +85,17 @@ def gen_DLki_mat():
 
     return M
 
+
 def save_data (folder, name, data):
     model_file = folder + name + '.pkl'
     with open(model_file, 'wr') as f:
         pickle.dump(data, f)
 
+
 def load_data(folder, name):
     model_file = folder + name + '.pkl'
     if os.path.exists(model_file):
         data = pickle.load(open(model_file, 'rb'))
-    return data
+        return data
+    else:
+        raise Exception("No {} can be found!".format(model_file))

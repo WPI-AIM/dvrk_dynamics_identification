@@ -49,6 +49,8 @@ class Geometry:
             self.p_c[num] = self.T_0nc[num][0:3, 3]
             vprint('v_cw{}'.format(num))
 
+
+        #TO MAKE FASTER : COMMENT THIS
             v_cw = sympy.diff(self.p_c[num].subs(self.rbt_df.subs_q2qt), t)
             v_cw = v_cw.subs(self.rbt_df.subs_dqt2dq + self.rbt_df.subs_qt2q)
             self.v_cw[num] = sympy.simplify(v_cw)
@@ -78,10 +80,17 @@ class Geometry:
         for num in range(self.rbt_df.frame_num):
             self.p_n_func[num] = sympy.lambdify(input_vars, self.p_n[num])
 
-    def draw_geom(self):
-        frame_drawer = FrameDrawer((-0.6, 0.2), (-0.6, 0.6), (-0.6, 0.2))
+    def draw_geom(self, angle=0):
+        frame_drawer = FrameDrawer((-0.6, 0.4), (-0.4, 0.4), (-0.6, 0.2))
 
-        subs_q2zero = [(q, 0) for q in self.rbt_df.coordinates]
+        if angle == 0:
+            subs_q2zero = [(q, angle) for q in self.rbt_df.coordinates]
+
+        else :
+            subs_q2zero = []
+            x = self.rbt_df.coordinates
+            for i in range(len(x)):
+                subs_q2zero.append((x[i], angle[i]))
 
         for num in self.rbt_df.link_nums:
             T = np.matrix(self.T_0n[num].subs(subs_q2zero))

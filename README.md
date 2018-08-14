@@ -40,10 +40,11 @@ to solve the dynamics model identification of it. This software framework was de
 * Identification of the dynamic model of the MTM
 * Identification of the dynamic model of the PSM
 
+
 ## Requirements
 * Python 2.7
 * Python modules
-    * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt
+    * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt, cloudpickle
 
 ## Application and example
 

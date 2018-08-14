@@ -107,7 +107,6 @@ class Dynamics:
         for k in range(len(self.rbt_def.K)):
             tau_k = self.rbt_def.springs[k] * self.rbt_def.K[k]
             index = self.rbt_def.coordinates.index(list(self.rbt_def.springs[k].free_symbols)[0])
-            print(tau_k)
             tau[index] += tau_k
 
         vprint('tau: ')

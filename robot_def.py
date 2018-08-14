@@ -186,7 +186,8 @@ class RobotDef:
             if self.use_Ia[num]:
                 self.Ia[num] = new_sym('Ia' + str(num))
 
-        for i in range(len(self.springs)):
+        self.spring_num = len(self.springs)
+        for i in range(self.spring_num):
             self.K[i] = new_sym('K' + str(i))
 
         vprint(self.m)
