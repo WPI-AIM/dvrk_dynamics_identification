@@ -33,7 +33,7 @@ to solve the dynamics model identification of it. This software framework was de
 * ~~Save and load parameters for each step to avoid repetitive work every time~~
 * Regularize output print
 * ~~Add motor inertia~~
-* Add spring parameters into dynamics model 
+* ~~Add spring parameters into dynamics model~~
 * Optimize the code to make it faster
 * Create the model of the MTM
 * Create the model of the PSM
