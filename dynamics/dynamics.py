@@ -87,7 +87,7 @@ class Dynamics:
 
             tau.append(sympy.simplify(dk_ddq_dt - dL_dq))
 
-        print("Adding frictions and motor rotor inertia...")
+        print("Adding frictions, motor rotor inertia and springs...")
         for i in range(self.rbt_def.frame_num):
             dq = self.rbt_def.dq_for_frame[i]
 
@@ -103,6 +103,12 @@ class Dynamics:
                 tau_index = self.rbt_def.dd_coordinates.index(self.rbt_def.ddq_for_frame[i])
                 tau[tau_index] += tau_Ia
                 # print("tau_Ia{}: {}".format(tau_index, tau_Ia))
+
+        for k in range(len(self.rbt_def.K)):
+            tau_k = self.rbt_def.springs[k] * self.rbt_def.K[k]
+            index = self.rbt_def.coordinates.index(list(self.rbt_def.springs[k].free_symbols)[0])
+            print(tau_k)
+            tau[index] += tau_k
 
         vprint('tau: ')
         vprint(tau)

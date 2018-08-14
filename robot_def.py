@@ -41,7 +41,7 @@ else:
 
 
 class RobotDef:
-    def __init__(self, params, dh_convention='mdh', friction_type=['viscous']):
+    def __init__(self, params, springs, dh_convention='mdh', friction_type=['viscous']):
 
         self.frame_num = len(params)
         self.link_nums = [p[0] for p in params]
@@ -54,6 +54,7 @@ class RobotDef:
         self.use_inertia = [p[7] for p in params]
         self.use_Ia = [p[8] for p in params]
         self.use_friction = [p[9] for p in params]
+        self.springs = springs
         self.dh_convention = dh_convention
         if self.dh_convention in ['sdh', 'std']:
             self._dh_transmat = _standard_dh_transfmat
@@ -62,7 +63,8 @@ class RobotDef:
         self.friction_type = friction_type
         vprint("frame_number: ", self.frame_num)
         vprint(self.succ_link_num)
-        vprint(sympy.Matrix(self.dh_a + self.dh_alpha + self.dh_d + self.dh_theta).free_symbols)
+        #print(sympy.Matrix(self.dh_a + self.dh_alpha + self.dh_d + self.dh_theta))
+        vprint(sympy.Matrix([self.dh_a + self.dh_alpha + self.dh_d + self.dh_theta]).free_symbols)
         #print(sympy.Matrix(self.dh_a + self.dh_alpha, self.dh_d + self.dh_theta))
         #for p in dh_params:
 
@@ -159,6 +161,7 @@ class RobotDef:
         self.Fv = list(range(self.frame_num))
         self.Fo = list(range(self.frame_num))
         self.Ia = list(range(self.frame_num))
+        self.K = list(range(len(self.springs)))
 
         for num in self.link_nums[1:]:
             self.m[num] = new_sym('m'+str(num))
@@ -183,10 +186,14 @@ class RobotDef:
             if self.use_Ia[num]:
                 self.Ia[num] = new_sym('Ia' + str(num))
 
+        for i in range(len(self.springs)):
+            self.K[i] = new_sym('K' + str(i))
+
         vprint(self.m)
         vprint(self.l)
         vprint(self.r)
         vprint(self.I_vec, self.L_vec)
+        vprint(self.K)
 
     def _dyn_params(self):
         self.std_params = []
@@ -216,6 +223,10 @@ class RobotDef:
             if self.use_Ia[num]:
                 self.bary_params += [self.Ia[num]]
                 self.std_params += [self.Ia[num]]
+
+        for k in self.K:
+            self.bary_params += [k]
+            self.std_params += [k]
 
         vprint("Barycentric parameters:")
         vprint(sympy.Matrix(self.bary_params))

@@ -81,12 +81,12 @@ class Geometry:
     def draw_geom(self):
         frame_drawer = FrameDrawer((-0.6, 0.2), (-0.6, 0.6), (-0.6, 0.2))
 
-        subs_q2zero = [(q, 1) for q in self.rbt_df.coordinates]
+        subs_q2zero = [(q, 0) for q in self.rbt_df.coordinates]
 
         for num in self.rbt_df.link_nums:
             T = np.matrix(self.T_0n[num].subs(subs_q2zero))
             frame_drawer.draw_frame(T, num)
-            print(T[0:3, 3])
+            #print(T[0:3, 3])
             if num != 0:
                 T_prev = np.matrix(self.T_0n[self.rbt_df.prev_link_num[num]].subs(subs_q2zero))
                 frame_drawer.drawSegment(T_prev, T)
