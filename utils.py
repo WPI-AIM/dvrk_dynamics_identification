@@ -2,6 +2,7 @@ import sympy
 import numpy as np
 import cloudpickle as pickle
 import os.path
+import csv
 
 def new_sym(name):
     return sympy.symbols(name, real=True)
@@ -89,6 +90,12 @@ def save_data (folder, name, data):
     model_file = folder + name + '.pkl'
     with open(model_file, 'wr') as f:
         pickle.dump(data, f)
+
+def save_csv_data(folder, name, data):
+    with open(folder + name + '.csv', 'wb') as myfile:
+        wr = csv.writer(myfile, quoting=csv.QUOTE_NONE)
+        for i in range(np.size(data, 0) - 10):
+            wr.writerow(data[i])
 
 def load_data(folder, name):
     model_file = folder + name + '.pkl'

@@ -3,11 +3,12 @@ import pyOpt
 import numpy as np
 import matplotlib.pyplot as plt
 from fourier_traj import FourierTraj
-
+import csv
 import sympy
 
-q0_scale = np.pi
-fourier_scale = 1
+#q0_scale = np.pi
+q0_scale = 5
+fourier_scale = 50
 
 # joint constraints
 # [(joint_var, q_low, q_upper, dq_low, dq_upper), ..., (...)]
@@ -38,7 +39,7 @@ class TrajOptimizer:
 
         # sample number for the highest term
         #self._sample_point = 12
-        self._sample_point = 100
+        self._sample_point = 25
 
         self.fourier_traj = FourierTraj(self._dyn.dof, self._order, self._base_freq,
                                         sample_num_per_period=self._sample_point)
@@ -58,6 +59,7 @@ class TrajOptimizer:
         self.frame_traj = np.zeros((len(self.const_frame_ind), self.sample_num, 3))
 
         print('frames_constrained: {}'.format(self.const_frame_ind))
+
     def _prepare_opt(self):
         sample_num = self._order * self._sample_point + 1
         self.sample_num = sample_num
@@ -206,3 +208,13 @@ class TrajOptimizer:
                 #print(p_num[:, 0])
                 self.frame_traj[i, num, :] = p_num[:, 0]
 
+    def make_traj_csv(self, folder, name, freq, tf):
+
+        x = FourierTraj(self._dyn.dof, self._order, self._base_freq, sample_num_per_period=self._sample_point, frequency=freq, final_time=tf)
+
+        q, dq, ddq = x.fourier_base_x2q(self.x_result)
+
+        with open(folder + name + '.csv', 'wb') as myfile:
+            wr = csv.writer(myfile, quoting=csv.QUOTE_NONE)
+            for i in range(np.size(q, 0) - 10):
+                wr.writerow(np.append(q[i], freq))
