@@ -50,10 +50,13 @@ class Dynamics:
         for num in self.rbt_def.link_nums[1:]:
             k_e_n = 0
             if self.rbt_def.use_inertia[num]:
+                print("Calculating the link kinetic energy of {}/{}".format(num, self.rbt_def.link_nums[-1]))
                 p_e += -self.rbt_def.m[num] * self.geom.p_c[num].dot(self._g)
 
                 k_e_n = self.rbt_def.m[num] * self.geom.v_cw[num].dot(self.geom.v_cw[num])/2 +\
                        (self.geom.w_b[num].transpose() * self.rbt_def.I_by_Llm[num] * self.geom.w_b[num])[0, 0]/2
+                # if num == 5 or num == 6 or num == 7:
+                #     continue
                 k_e_n = sympy.simplify(k_e_n)
 
             # if self.rbt_def.use_Ia[num]:
@@ -61,11 +64,13 @@ class Dynamics:
             #     print("k_m: {}".format(k_m))
             #     k_e_n += k_m
 
-            vprint('k_e:', k_e_n)
+            #vprint('k_e:', k_e_n)
             k_e += k_e_n
 
         # Lagrangian
         L = k_e - p_e
+
+        #L_A, L_b = sympy.linear_eq_to_matrix(L, self.rbt_def.bary_params)
 
         tau = []
         vprint(len(self.rbt_def.coordinates))
@@ -75,15 +80,15 @@ class Dynamics:
             dk_ddq = sympy.diff(k_e, dq)
             dk_ddq_t = dk_ddq.subs(self.rbt_def.subs_q2qt + self.rbt_def.subs_dq2dqt)
             dk_ddq_dtt = sympy.diff(dk_ddq_t, sympy.Symbol('t'))
-            vprint('dk_ddq_dtt:')
-            vprint(dk_ddq_dtt)
+            print('dk_ddq_dtt:')
+            #vprint(dk_ddq_dtt)
             dk_ddq_dt = dk_ddq_dtt.subs(self.rbt_def.subs_ddqt2ddq + self.rbt_def.subs_dqt2dq + self.rbt_def.subs_qt2q)
-            vprint('dk_ddq_dt:')
-            vprint(dk_ddq_dt)
+            print('dk_ddq_dt:')
+            #print(dk_ddq_dt)
 
             dL_dq = sympy.diff(L, q)
-            vprint('dL_dq:')
-            vprint(dL_dq)
+            print('dL_dq:')
+            #vprint(dL_dq)
 
             tau.append(sympy.simplify(dk_ddq_dt - dL_dq))
 
@@ -107,7 +112,7 @@ class Dynamics:
         for k in range(len(self.rbt_def.K)):
             tau_k = self.rbt_def.springs[k] * self.rbt_def.K[k]
             index = self.rbt_def.coordinates.index(list(self.rbt_def.springs[k].free_symbols)[0])
-            tau[index] += tau_k
+            tau[index] += -tau_k
 
         vprint('tau: ')
         vprint(tau)

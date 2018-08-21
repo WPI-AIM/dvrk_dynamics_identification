@@ -18,7 +18,7 @@ to solve the dynamics model identification of it. This software framework was de
     * Remove the data whose velocity is close to zero to decrease the noise for Coulomb friction
 * Identification
     * Ordinary Least Square (OLS)
-    * Weighted Least Square (WLS)
+    * ~~Weighted Least Square (WLS)~~
     * Semi-definite Programming (SDP)
 ### Yet to be done
 
@@ -36,7 +36,7 @@ to solve the dynamics model identification of it. This software framework was de
 * ~~Add spring parameters into dynamics model~~
 * Optimize the code to make it faster
 * Create the model of the MTM
-* Create the model of the PSM
+* ~~Create the model of the PSM~~
 * Identification of the dynamic model of the MTM
 * Identification of the dynamic model of the PSM
 
