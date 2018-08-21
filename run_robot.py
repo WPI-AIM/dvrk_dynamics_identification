@@ -15,8 +15,10 @@ robotname = 'PSM2'
 
 dof = len(q[0]) - 1
 freq = q[0, -1]
-a = q
-print(q[0, :])
+a = q[:, 0:-1]
+
+print(q[0, :],q.shape)
+print(a[0, :], a.shape)
 
 speedscale = 1
 scale = 1
@@ -31,14 +33,13 @@ r = rospy.Rate(freq * speedscale)
 p.home()
 
 # Home to start of trajectory based on CSV
-
 if x and dof == 7:
     array = np.linspace(0, dof-1, dof)
-    p.move_joint_some(q[0, 0:dof-1], array)
+    p.move_joint_some(a[0, 0:dof-1], array)
     p.move_jaw(q[0, -1])
 else:
     array = np.linspace(0, dof, dof+1)
-    p.move_joint_some(q[0, 0:dof], array)
+    p.move_joint_some(a[0, 0:dof], array)
 print(array)
 
 states = np.zeros((len(q), 3 * dof))
