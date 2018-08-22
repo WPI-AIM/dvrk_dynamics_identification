@@ -6,8 +6,9 @@ from fourier_traj import FourierTraj
 
 import sympy
 
-q0_scale = np.pi
-fourier_scale = 1
+
+q0_scale = 4*np.pi
+fourier_scale = np.pi
 
 # joint constraints
 # [(joint_var, q_low, q_upper, dq_low, dq_upper), ..., (...)]

@@ -2,6 +2,9 @@ import sympy
 import numpy as np
 import cloudpickle as pickle
 import os.path
+import os
+import errno
+
 
 def new_sym(name):
     return sympy.symbols(name, real=True)
@@ -88,7 +91,15 @@ def gen_DLki_mat():
 
 def save_data (folder, name, data):
     model_file = folder + name + '.pkl'
-    with open(model_file, 'wr') as f:
+
+    if not os.path.exists(os.path.dirname(model_file)):
+        try:
+            os.makedirs(os.path.dirname(model_file))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+    with open(model_file, 'w+') as f:
         pickle.dump(data, f)
 
 
