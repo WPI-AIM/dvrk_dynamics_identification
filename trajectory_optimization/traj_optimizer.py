@@ -178,6 +178,7 @@ class TrajOptimizer:
         #x = np.random.random((self._dyn.rbt_def.dof * (2*self._order+1)))
         #print(self._obj_func(x))
         slsqp = pyOpt.pySLSQP.SLSQP()
+        #slsqp = pyOpt.pyPSQP.PSQP()
 
         slsqp.setOption('IPRINT', -1)
 
