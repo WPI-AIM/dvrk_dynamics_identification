@@ -63,7 +63,7 @@ while i < len(a) and not rospy.is_shutdown():
         states[i][0:dof-1] = p.get_current_joint_position()[0:dof-1]
         states[i][7] = p.get_current_jaw_position()
         states[i][dof:dof * 2-1] = p.get_current_joint_effort()[0:dof-1]
-        states[i][dof + 7] = p.get_current_jaw_effort()
+        states[i][dof + 6] = p.get_current_jaw_effort()
         #print('it works')
     else:
         p.move_joint_some(q[i, :], array, False)
