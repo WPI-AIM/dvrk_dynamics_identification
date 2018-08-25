@@ -7,8 +7,8 @@ from fourier_traj import FourierTraj
 import sympy
 
 
-q0_scale = 4*np.pi
-fourier_scale = np.pi
+q0_scale = np.pi
+fourier_scale = 3*np.pi
 
 # joint constraints
 # [(joint_var, q_low, q_upper, dq_low, dq_upper), ..., (...)]
@@ -86,12 +86,34 @@ class TrajOptimizer:
         g = [0.0] * (self._const_num * self.sample_num)
         g_cnt = 0
 
-        # Joint constraints
-        for j_c in self._joint_constraints:
-            q_s, q_l, q_u, dq_l, dq_u = j_c
-            co_num = self._dyn.coordinates.index(q_s)
+        # Joint constraints (old)
+        # for j_c in self._joint_constraints:
+        #     q_s, q_l, q_u, dq_l, dq_u = j_c
+        #     co_num = self._dyn.coordinates.index(q_s)
+        #
+        #     for qt, dqt in zip(q[:, co_num], dq[:, co_num]):
+        #         g[g_cnt] = qt - q_u
+        #         g_cnt += 1
+        #         g[g_cnt] = q_l - qt
+        #         g_cnt += 1
+        #         g[g_cnt] = dqt - dq_u
+        #         g_cnt += 1
+        #         g[g_cnt] = dq_l - dqt
+        #         g_cnt += 1
 
-            for qt, dqt in zip(q[:, co_num], dq[:, co_num]):
+        # Joint constraints (with composite joint angle considered)
+        q_ss = [c[0] for c in self._joint_constraints]
+
+        A, _ = sympy.linear_eq_to_matrix(q_ss, self._dyn.coordinates)
+        A_T = np.matrix(A).astype(np.float).transpose()
+
+        q_c = np.matmul(q, A_T)
+        dq_c = np.matmul(dq, A_T)
+
+        for j, j_c in enumerate(self._joint_constraints):
+            _, q_l, q_u, dq_l, dq_u = j_c
+
+            for qt, dqt in zip(q_c[:, j], dq_c[:, j]):
                 g[g_cnt] = qt - q_u
                 g_cnt += 1
                 g[g_cnt] = q_l - qt
@@ -100,9 +122,6 @@ class TrajOptimizer:
                 g_cnt += 1
                 g[g_cnt] = dq_l - dqt
                 g_cnt += 1
-        # print('g: ', g)
-        #print('constraints number: ', g_cnt)
-
 
         # Cartesian Constraints
         # print(q.shape[0])
@@ -180,7 +199,7 @@ class TrajOptimizer:
         slsqp = pyOpt.pySLSQP.SLSQP()
         #slsqp = pyOpt.pyPSQP.PSQP()
 
-        slsqp.setOption('IPRINT', -1)
+        slsqp.setOption('IPRINT', 0)
 
         [fstr, xstr, inform] = slsqp(self._opt_prob, sens_type='FD')
 

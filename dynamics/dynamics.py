@@ -88,7 +88,7 @@ class Dynamics:
 
         print("Calculating joint torques...")
         for q, dq in zip(self.rbt_def.coordinates, self.rbt_def.d_coordinates):
-            print("tau of {}".format(q.))
+            print("tau of {}".format(q))
             dk_ddq = sympy.diff(k_e, dq)
             dk_ddq_t = dk_ddq.subs(self.rbt_def.subs_q2qt + self.rbt_def.subs_dq2dqt)
             dk_ddq_dtt = sympy.diff(dk_ddq_t, sympy.Symbol('t'))
