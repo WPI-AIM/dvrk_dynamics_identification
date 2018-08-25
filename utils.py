@@ -2,7 +2,10 @@ import sympy
 import numpy as np
 import cloudpickle as pickle
 import os.path
+import os
+import errno
 import csv
+
 
 def new_sym(name):
     return sympy.symbols(name, real=True)
@@ -86,9 +89,18 @@ def gen_DLki_mat():
 
     return M
 
+
 def save_data (folder, name, data):
     model_file = folder + name + '.pkl'
-    with open(model_file, 'wr') as f:
+
+    if not os.path.exists(os.path.dirname(model_file)):
+        try:
+            os.makedirs(os.path.dirname(model_file))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+    with open(model_file, 'w+') as f:
         pickle.dump(data, f)
 
 def save_csv_data(folder, name, data):
@@ -101,4 +113,6 @@ def load_data(folder, name):
     model_file = folder + name + '.pkl'
     if os.path.exists(model_file):
         data = pickle.load(open(model_file, 'rb'))
-    return data
+        return data
+    else:
+        raise Exception("No {} can be found!".format(model_file))

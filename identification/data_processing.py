@@ -378,7 +378,7 @@ def barycentric2standard_params(x, rbt_def):
     i = 0
     i_link = 1
     x_out = []
-    while i < len(rbt_def.bary_param):
+    while i_link < rbt_def.frame_num:
         if rbt_def.use_inertia[i_link]:
             m = x[i + 9]
             rx, ry, rz = x[i + 6] / m, x[i + 7] / m, x[i + 8] / m
@@ -408,6 +408,10 @@ def barycentric2standard_params(x, rbt_def):
             i += 1
 
         i_link += 1
+
+    for j in range(rbt_def.spring_num):
+        x_out += [x[i]]
+        i += 1
 
     return x_out
 

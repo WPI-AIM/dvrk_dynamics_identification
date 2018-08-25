@@ -46,48 +46,66 @@ class Dynamics:
         # Calculate kinetic energy and potential energy
         p_e = 0
         k_e = 0
+        self.k_e3 = 0
 
         for num in self.rbt_def.link_nums[1:]:
             k_e_n = 0
             if self.rbt_def.use_inertia[num]:
+                print("Calculating the link kinetic energy of {}/{}".format(num, self.rbt_def.link_nums[-1]))
                 p_e += -self.rbt_def.m[num] * self.geom.p_c[num].dot(self._g)
 
                 k_e_n = self.rbt_def.m[num] * self.geom.v_cw[num].dot(self.geom.v_cw[num])/2 +\
                        (self.geom.w_b[num].transpose() * self.rbt_def.I_by_Llm[num] * self.geom.w_b[num])[0, 0]/2
-                k_e_n = sympy.simplify(k_e_n)
+                # if num == 5 or num == 6 or num == 7:
+                #     continue
 
+                # k_e_n = sympy.simplify(k_e_n) # this is replaced by the following code to reduce time cost
+                k_e_n = sympy.factor(sympy.expand(k_e_n) - sympy.expand(k_e_n * self.rbt_def.m[num]).subs(self.rbt_def.m[num], 0)/self.rbt_def.m[num])
+
+                # if num == 3:
+                #     print(k_e_n)
+                #     self.k_e3 = k_e_n
+
+                # if num == 3:
+                #     print(k_e_n)
             # if self.rbt_def.use_Ia[num]:
             #     k_m = self.rbt_def.Ia[num] * self.rbt_def.dq_for_frame[num]**2 / 2
             #     print("k_m: {}".format(k_m))
             #     k_e_n += k_m
 
-            vprint('k_e:', k_e_n)
+            #vprint('k_e:', k_e_n)
             k_e += k_e_n
 
         # Lagrangian
         L = k_e - p_e
 
+        # L_A, L_b = sympy.linear_eq_to_matrix([L], self.rbt_def.bary_params)
+        # print("L_A: ", L_A)
+        # print("L_b: ", L_b)
+
         tau = []
-        vprint(len(self.rbt_def.coordinates))
+        # vprint(len(self.rbt_def.coordinates))
 
         print("Calculating joint torques...")
         for q, dq in zip(self.rbt_def.coordinates, self.rbt_def.d_coordinates):
+            print("tau of {}".format(q))
             dk_ddq = sympy.diff(k_e, dq)
             dk_ddq_t = dk_ddq.subs(self.rbt_def.subs_q2qt + self.rbt_def.subs_dq2dqt)
             dk_ddq_dtt = sympy.diff(dk_ddq_t, sympy.Symbol('t'))
-            vprint('dk_ddq_dtt:')
-            vprint(dk_ddq_dtt)
+            #print('dk_ddq_dtt:')
+            #vprint(dk_ddq_dtt)
             dk_ddq_dt = dk_ddq_dtt.subs(self.rbt_def.subs_ddqt2ddq + self.rbt_def.subs_dqt2dq + self.rbt_def.subs_qt2q)
-            vprint('dk_ddq_dt:')
-            vprint(dk_ddq_dt)
+            #print('dk_ddq_dt:')
+            #print(dk_ddq_dt)
 
             dL_dq = sympy.diff(L, q)
-            vprint('dL_dq:')
-            vprint(dL_dq)
+            #print('dL_dq:')
+            #vprint(dL_dq)
 
-            tau.append(sympy.simplify(dk_ddq_dt - dL_dq))
+            #tau.append(sympy.simplify(dk_ddq_dt - dL_dq))
+            tau.append(sympy.expand(dk_ddq_dt - dL_dq))
 
-        print("Adding frictions and motor rotor inertia...")
+        print("Adding frictions, motor rotor inertia and springs...")
         for i in range(self.rbt_def.frame_num):
             dq = self.rbt_def.dq_for_frame[i]
 
@@ -104,6 +122,11 @@ class Dynamics:
                 tau[tau_index] += tau_Ia
                 # print("tau_Ia{}: {}".format(tau_index, tau_Ia))
 
+        for k in range(len(self.rbt_def.K)):
+            tau_k = self.rbt_def.springs[k] * self.rbt_def.K[k]
+            index = self.rbt_def.coordinates.index(list(self.rbt_def.springs[k].free_symbols)[0])
+            tau[index] += -tau_k
+
         vprint('tau: ')
         vprint(tau)
 
@@ -112,22 +135,22 @@ class Dynamics:
     def _calc_regressor(self):
         print("Calculating gregressor...")
         A, b = sympy.linear_eq_to_matrix(self.tau, self.rbt_def.bary_params)
-        vprint('A:')
-        vprint(A)
-        vprint(A.shape)
+        # vprint('A:')
+        # vprint(A)
+        # vprint(A.shape)
         self.H = A
-        vprint('b:')
-        vprint(b)
-        vprint('Ax - b:')
-        vprint(sympy.simplify(A*sympy.Matrix(self.rbt_def.bary_params) - sympy.Matrix(self.tau)))
+        # vprint('b:')
+        # vprint(b)
+        # vprint('Ax - b:')
+        # vprint(sympy.simplify(A*sympy.Matrix(self.rbt_def.bary_params) - sympy.Matrix(self.tau)))
 
         input_vars = tuple(self.rbt_def.coordinates + self.rbt_def.d_coordinates + self.rbt_def.dd_coordinates)
         print('input_vars', input_vars)
         self.H_func = sympy.lambdify(input_vars, self.H)
-        vprint(self.H_func)
-        start_time = time.time()
-        vprint(self.H_func(*np.random.random_sample((len(input_vars),))))
-        vprint('time: ', time.time() - start_time)
+        # vprint(self.H_func)
+        # start_time = time.time()
+        # vprint(self.H_func(*np.random.random_sample((len(input_vars),))))
+        # vprint('time: ', time.time() - start_time)
 
     def _calc_base_param(self):
         print("Calculating base parameter...")

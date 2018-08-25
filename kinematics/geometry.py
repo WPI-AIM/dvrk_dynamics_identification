@@ -95,7 +95,7 @@ class Geometry:
         for num in self.rbt_df.link_nums:
             T = np.matrix(self.T_0n[num].subs(subs_q2zero))
             frame_drawer.draw_frame(T, num)
-            print(T[0:3, 3])
+            #print(T[0:3, 3])
             if num != 0:
                 T_prev = np.matrix(self.T_0n[self.rbt_df.prev_link_num[num]].subs(subs_q2zero))
                 frame_drawer.drawSegment(T_prev, T)

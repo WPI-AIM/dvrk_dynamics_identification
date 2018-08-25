@@ -31,7 +31,6 @@ def find_dyn_parm_deps(dof, parm_num, regressor_func):
         dq = (np.random.random_sample((dof,)) * 2.0 * pi - pi).tolist()
         ddq = (np.random.random_sample((dof,)) * 2.0 * pi - pi).tolist()
         input_vars = q + dq + ddq
-
         Z[i * dof: i * dof + dof, :] = np.matrix(regressor_func(*input_vars))
 
     r = np.linalg.matrix_rank(Z)
