@@ -65,6 +65,7 @@ while i < len(a) and not rospy.is_shutdown():
         states[i][dof:dof * 2-1] = p.get_current_joint_effort()[0:dof-1]
         states[i][dof + 6] = p.get_current_jaw_effort()
         #print('it works')
+
     else:
         p.move_joint_some(q[i, :], array, False)
 
@@ -78,7 +79,8 @@ while i < len(a) and not rospy.is_shutdown():
     r.sleep()
     i = i + 1
 
-with open(name + '_results.csv', 'wb') as myfile:
+name2 = './data/' + modelname + '/measured_trajectory/' + testname
+with open(name2 + '_results.csv', 'wb') as myfile:
     wr = csv.writer(myfile, quoting=csv.QUOTE_NONE)
     for i in range(np.size(states, 0) - 1):
         wr.writerow(states[i])

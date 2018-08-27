@@ -29,7 +29,7 @@ class TrajOptimizer:
         self._cartesian_constraints = cartesian_constraints
         self._cartesian_const_num = len(self._cartesian_constraints)
         print('cartesian constraint number: {}'.format(self._cartesian_const_num))
-        self._const_num = self._joint_const_num * 4 + self._cartesian_const_num * 6
+        self._const_num = self._joint_const_num * 4 + self._cartesian_const_num * 3
         print('constraint number: {}'.format(self._const_num))
 
         self._q0_min = q0_min
@@ -79,10 +79,11 @@ class TrajOptimizer:
         for n in range(self.sample_num):
             vars_input = q[n, :].tolist() + dq[n, :].tolist() + ddq[n, :].tolist()
             self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :] = self._dyn.H_b_func(*vars_input)
-        # print('H: ', self.H)
+
+        print('H: ', self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :])
 
         f = np.linalg.cond(self.H)
-        # print('f: ', f)
+        #print('f: ', f)
 
         # constraint
         g = [0.0] * (self._const_num * self.sample_num)
@@ -153,7 +154,7 @@ class TrajOptimizer:
                     g[g_cnt] = -p_num[2, 0] + c_z
                     g_cnt += 1
 
-        fail = 1
+        fail = 0
         return f, g, fail
 
     def _add_obj2prob(self):

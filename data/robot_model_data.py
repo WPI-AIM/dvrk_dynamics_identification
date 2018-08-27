@@ -13,6 +13,9 @@ class RobotModel:
         self.std_param = dyn.rbt_def.std_params
         self.bary_param = dyn.rbt_def.bary_params
 
+        self.H_b = dyn.H_b
+        self.H = dyn.H
+
         self.H_b_func = dyn.H_b_func
         self.H_func = dyn.H_func
         self.p_n_func = dyn.geom.p_n_func
