@@ -3,7 +3,7 @@ import pyOpt
 import numpy as np
 import matplotlib.pyplot as plt
 from fourier_traj import FourierTraj
-
+import csv
 import sympy
 
 
@@ -29,7 +29,7 @@ class TrajOptimizer:
         self._cartesian_constraints = cartesian_constraints
         self._cartesian_const_num = len(self._cartesian_constraints)
         print('cartesian constraint number: {}'.format(self._cartesian_const_num))
-        self._const_num = self._joint_const_num * 4 + self._cartesian_const_num * 6
+        self._const_num = self._joint_const_num * 4 + self._cartesian_const_num * 3
         print('constraint number: {}'.format(self._const_num))
 
         self._q0_min = q0_min
@@ -38,7 +38,8 @@ class TrajOptimizer:
         self._ab_max = ab_max
 
         # sample number for the highest term
-        self._sample_point = 12
+        #self._sample_point = 12
+        self._sample_point = 25
 
         self.fourier_traj = FourierTraj(self._dyn.dof, self._order, self._base_freq,
                                         sample_num_per_period=self._sample_point)
@@ -58,6 +59,7 @@ class TrajOptimizer:
         self.frame_traj = np.zeros((len(self.const_frame_ind), self.sample_num, 3))
 
         print('frames_constrained: {}'.format(self.const_frame_ind))
+
     def _prepare_opt(self):
         sample_num = self._order * self._sample_point + 1
         self.sample_num = sample_num
@@ -66,7 +68,7 @@ class TrajOptimizer:
         t = np.linspace(0, period, num=sample_num)
 
         self.H = np.zeros((self._dyn.dof * sample_num, self._dyn.base_num))
-
+        self.H_norm = np.zeros((self._dyn.dof * sample_num, self._dyn.base_num))
     def _obj_func(self, x):
         # objective
         q, dq, ddq = self.fourier_traj.fourier_base_x2q(x)
@@ -77,9 +79,17 @@ class TrajOptimizer:
         for n in range(self.sample_num):
             vars_input = q[n, :].tolist() + dq[n, :].tolist() + ddq[n, :].tolist()
             self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :] = self._dyn.H_b_func(*vars_input)
-        # print('H: ', self.H)
 
-        f = np.linalg.cond(self.H)
+        #print('H: ', self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :])
+
+        # f = np.linalg.cond(self.H)
+        # #print(f)
+        # y = self.H
+        # xmax, xmin = y.max(), y.min()
+        # y = (y - xmin) / (xmax - xmin)
+        # #print(y[0,:])
+        #
+        # f = np.linalg.cond(y)
         # print('f: ', f)
 
         # constraint
@@ -151,7 +161,7 @@ class TrajOptimizer:
                     g[g_cnt] = -p_num[2, 0] + c_z
                     g_cnt += 1
 
-        fail = 1
+        fail = 0
         return f, g, fail
 
     def _add_obj2prob(self):
@@ -226,3 +236,13 @@ class TrajOptimizer:
                 #print(p_num[:, 0])
                 self.frame_traj[i, num, :] = p_num[:, 0]
 
+    def make_traj_csv(self, folder, name, freq, tf):
+
+        x = FourierTraj(self._dyn.dof, self._order, self._base_freq, sample_num_per_period=self._sample_point, frequency=freq, final_time=tf)
+
+        q, dq, ddq = x.fourier_base_x2q(self.x_result)
+
+        with open(folder + name + '.csv', 'wb') as myfile:
+            wr = csv.writer(myfile, quoting=csv.QUOTE_NONE)
+            for i in range(np.size(q, 0) - 10):
+                wr.writerow(np.append(q[i], freq))

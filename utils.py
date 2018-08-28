@@ -4,6 +4,7 @@ import cloudpickle as pickle
 import os.path
 import os
 import errno
+import csv
 
 
 def new_sym(name):
@@ -102,6 +103,11 @@ def save_data (folder, name, data):
     with open(model_file, 'w+') as f:
         pickle.dump(data, f)
 
+def save_csv_data(folder, name, data):
+    with open(folder + name + '.csv', 'wb') as myfile:
+        wr = csv.writer(myfile, quoting=csv.QUOTE_NONE)
+        for i in range(np.size(data, 0) - 10):
+            wr.writerow(data[i])
 
 def load_data(folder, name):
     model_file = folder + name + '.pkl'
