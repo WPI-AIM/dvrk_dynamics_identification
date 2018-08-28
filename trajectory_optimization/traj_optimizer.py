@@ -68,7 +68,7 @@ class TrajOptimizer:
         t = np.linspace(0, period, num=sample_num)
 
         self.H = np.zeros((self._dyn.dof * sample_num, self._dyn.base_num))
-
+        self.H_norm = np.zeros((self._dyn.dof * sample_num, self._dyn.base_num))
     def _obj_func(self, x):
         # objective
         q, dq, ddq = self.fourier_traj.fourier_base_x2q(x)
@@ -80,10 +80,17 @@ class TrajOptimizer:
             vars_input = q[n, :].tolist() + dq[n, :].tolist() + ddq[n, :].tolist()
             self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :] = self._dyn.H_b_func(*vars_input)
 
-        print('H: ', self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :])
+        #print('H: ', self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :])
 
-        f = np.linalg.cond(self.H)
-        #print('f: ', f)
+        # f = np.linalg.cond(self.H)
+        # #print(f)
+        # y = self.H
+        # xmax, xmin = y.max(), y.min()
+        # y = (y - xmin) / (xmax - xmin)
+        # #print(y[0,:])
+        #
+        # f = np.linalg.cond(y)
+        # print('f: ', f)
 
         # constraint
         g = [0.0] * (self._const_num * self.sample_num)
