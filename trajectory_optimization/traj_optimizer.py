@@ -7,8 +7,8 @@ from fourier_traj import FourierTraj
 import sympy
 
 
-q0_scale = np.pi
-fourier_scale = 3*np.pi
+q0_scale = np.pi/2
+fourier_scale = 2*np.pi
 
 # joint constraints
 # [(joint_var, q_low, q_upper, dq_low, dq_upper), ..., (...)]
@@ -38,7 +38,7 @@ class TrajOptimizer:
         self._ab_max = ab_max
 
         # sample number for the highest term
-        self._sample_point = 12
+        self._sample_point = 10
 
         self.fourier_traj = FourierTraj(self._dyn.dof, self._order, self._base_freq,
                                         sample_num_per_period=self._sample_point)
@@ -151,7 +151,10 @@ class TrajOptimizer:
                     g[g_cnt] = -p_num[2, 0] + c_z
                     g_cnt += 1
 
-        fail = 1
+        fail = 0
+
+        print("f: {}".format(f))
+
         return f, g, fail
 
     def _add_obj2prob(self):
@@ -200,6 +203,7 @@ class TrajOptimizer:
         #slsqp = pyOpt.pyPSQP.PSQP()
 
         slsqp.setOption('IPRINT', 0)
+        #slsqp.setOption('MAXIT', 2)
 
         [fstr, xstr, inform] = slsqp(self._opt_prob, sens_type='FD')
 
