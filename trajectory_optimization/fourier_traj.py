@@ -1,5 +1,5 @@
 import numpy as np
-
+import math
 
 verbose = False
 
@@ -15,13 +15,18 @@ else:
 
 
 class FourierTraj:
-    def __init__(self, dof, order, base_freq, sample_num_per_period=10):
+    def __init__(self, dof, order, base_freq, sample_num_per_period=10, frequency='nan', final_time=10):
         self.dof = dof
         self.order = order
         self.base_freq = base_freq
         self.sample_num_per_period = sample_num_per_period
-        self.sample_num = self.order * self.sample_num_per_period + 1
-        #self.coordinates = coordinates
+
+        if math.isnan(float(frequency)):
+            self.sample_num = self.order * self.sample_num_per_period + 1
+            #self.coordinates = coordinates
+
+        else:
+            self.sample_num = frequency * final_time
 
         self._gen_q_base()
 

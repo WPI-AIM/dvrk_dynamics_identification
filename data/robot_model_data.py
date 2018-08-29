@@ -13,6 +13,9 @@ class RobotModel:
         self.std_param = dyn.rbt_def.std_params
         self.bary_param = dyn.rbt_def.bary_params
 
+        #self.H_b = dyn.H_b
+        #self.H = dyn.H
+
         self.H_b_func = dyn.H_b_func
         self.H_func = dyn.H_func
         self.p_n_func = dyn.geom.p_n_func
@@ -23,9 +26,9 @@ class RobotModel:
         self.friction_type = dyn.rbt_def.friction_type
         self.use_Ia = dyn.rbt_def.use_Ia
         self.spring_num = dyn.rbt_def.spring_num
+
         #Problems Loading matrix
         #self.T_0n = dyn.geom.T_0n[3] #Matrix?? 3 sucks
-
         #self.T_0n = dyn.geom.T_0n
 
 
