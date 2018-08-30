@@ -21,18 +21,18 @@ class FourierTraj:
         self.base_freq = base_freq
         self.sample_num_per_period = sample_num_per_period
 
+        # if no specified frequency and final_time, generate a one-period trajectory.
         if math.isnan(float(frequency)):
             self.sample_num = self.order * self.sample_num_per_period + 1
-            #self.coordinates = coordinates
-
+            self.period = 1.0 / self.base_freq
         else:
             self.sample_num = frequency * final_time
+            self.period = final_time
 
         self._gen_q_base()
 
     def _gen_q_base(self):
-        period = 1.0 / self.base_freq
-        self.t = np.linspace(0, period, num=self.sample_num)
+        self.t = np.linspace(0, self.period, num=self.sample_num)
 
         self.fourier_q_base = np.zeros((self.sample_num, 2 * self.order + 1))
         self.fourier_dq_base = np.zeros((self.sample_num, 2 * self.order + 1))

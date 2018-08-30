@@ -222,9 +222,7 @@ class TrajOptimizer:
 
         print self._opt_prob.solution(0)
 
-
     def calc_frame_traj(self):
-
         q, dq, ddq = self.fourier_traj.fourier_base_x2q(self.x_result)
         #print(self._dyn.p_n_func[int(self.const_frame_ind[0])])
         for i in range(len(self.const_frame_ind)):
@@ -237,7 +235,6 @@ class TrajOptimizer:
                 self.frame_traj[i, num, :] = p_num[:, 0]
 
     def make_traj_csv(self, folder, name, freq, tf):
-
         x = FourierTraj(self._dyn.dof, self._order, self._base_freq, sample_num_per_period=self._sample_point, frequency=freq, final_time=tf)
 
         q, dq, ddq = x.fourier_base_x2q(self.x_result)
