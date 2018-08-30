@@ -5,51 +5,71 @@ import csv
 import numpy as np
 import dvrk
 
-modelname = 'test_psm_long'
-testname = 'two'
+
+
+# Fist, several things we have to define before running it
+# modelname = 'test_psm_long'
+modelname = 'mtm'
+
+testname = 'one'
+# testname = 'two'
+
+# robotname = 'PSM1'
+robotname = 'MTMR'
+
+speedscale = 1
+scale = 0.6
+
+
 
 name = './data/' + modelname + '/optimal_trajectory/' + testname
 q = genfromtxt(name + '.csv', delimiter=',')
 
-robotname = 'PSM1'
 
 dof = len(q[0]) - 1
 freq = q[0, -1]
-a = q[:, 0:-1]
+a = q[:, 0:-1] * scale
 
-print(q[0, :],q.shape)
-print(a[0, :], a.shape)
+# print(q[0, :],q.shape)
+# print(a[0, :], a.shape)
+print("data shape: {}".format(a.shape))
 
-speedscale = 1
-scale = 1
 
-x = robotname[0:3] == 'PSM'
-if x:
+is_psm = robotname[0:3] == 'PSM'
+if is_psm:
     p = dvrk.psm(robotname)
 elif robotname[0:3] == 'MTM':
     p = dvrk.mtm(robotname)
 
+# deal with the parallelogram, where q3 = q8 - q2
+if not is_psm and dof == 7:
+	a[:, 2] = a[:, 2] - a[:, 1]
+
 r = rospy.Rate(freq * speedscale)
 p.home()
 
+
+
 # Home to start of trajectory based on CSV
-if x and dof == 7:
-    array = np.array([0,1,2,3,4,5])
-    p.move_joint_some(a[0, 0:dof-1], array)
+if is_psm and dof == 7:
+    jonits_array = np.array([0,1,2,3,4,5])
+    p.move_joint_some(a[0, 0:dof-1], jonits_array)
     p.move_jaw(q[0, -1])
 else:
-    array = np.linspace(0, dof, dof+1)
-    p.move_joint_some(a[0, 0:dof], array)
-print(array)
+	jonits_array = np.array([d for d in range(dof)])
+	p.move_joint_some(a[0, :], jonits_array)
+print("jonits_array: {}".format(jonits_array))
 
 #states = np.zeros((len(q), 3 * dof))
 states = np.zeros((len(q), 2 * dof))
 
-print(states.shape)
+print("states shape: {}".format(states.shape))
+
+# Excitation
 i = 0
 while i < len(a) and not rospy.is_shutdown():
-    if x and dof ==7:
-        p.move_joint_some(a[i, 0:dof-1], array, False)
+    if is_psm and dof ==7:
+        p.move_joint_some(a[i, 0:dof-1], jonits_array, False)
         p.move_jaw(a[0, -1],False)
 
         # states[i][0:dof-1] = p.get_current_joint_position()[0:dof-1]
@@ -67,7 +87,7 @@ while i < len(a) and not rospy.is_shutdown():
         #print('it works')
 
     else:
-        p.move_joint_some(q[i, :], array, False)
+        p.move_joint_some(a[i, :], jonits_array, False)
 
         # states[i][0:dof] = p.get_current_joint_position()[0:dof]
         # states[i][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
@@ -79,6 +99,8 @@ while i < len(a) and not rospy.is_shutdown():
     r.sleep()
     i = i + 1
 
+
+# Save data
 name2 = './data/' + modelname + '/measured_trajectory/' + testname
 with open(name2 + '_results.csv', 'wb') as myfile:
     wr = csv.writer(myfile, quoting=csv.QUOTE_NONE)
