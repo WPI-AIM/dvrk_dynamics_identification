@@ -20,8 +20,11 @@ testname = 'one'
 robotname = 'MTMR'
 
 speedscale = 1
-scale = 0.7
+scale = 0.75
+scales = np.array([1, 0.7, 0.7, 1, 1, 1, 1])
 
+# wait for a short period of time before recording data
+stable_time = 5
 
 
 name = './data/' + modelname + '/optimal_trajectory/' + testname
@@ -30,7 +33,8 @@ q = genfromtxt(name + '.csv', delimiter=',')
 
 dof = len(q[0]) - 1
 freq = q[0, -1]
-a = q[:, 0:-1] * scale
+# a = q[:, 0:-1] * scale
+a = q[:, 0:-1] * scales
 
 # print(q[0, :],q.shape)
 # print(a[0, :], a.shape)
@@ -63,7 +67,9 @@ else:
 print("jonits_array: {}".format(jonits_array))
 
 #states = np.zeros((len(q), 3 * dof))
-states = np.zeros((len(q), 2 * dof))
+start_cnt = int(freq*stable_time)
+max_state_num = len(q) - start_cnt
+states = np.zeros((max_state_num, 2 * dof))
 
 print("states shape: {}".format(states.shape))
 rospy.sleep(3)
@@ -71,6 +77,7 @@ rospy.sleep(3)
 r = rospy.Rate(freq * speedscale)
 # Excitation
 i = 0
+state_cnt = 0
 while i < len(a) and not rospy.is_shutdown():
     if is_psm and dof ==7:
         p.move_joint_some(a[i, 0:dof-1], jonits_array, False)
@@ -83,11 +90,13 @@ while i < len(a) and not rospy.is_shutdown():
         # states[i][dof * 2:dof * 3-1] = p.get_current_joint_effort()[0:dof-1]
         # #states[i][2 * dof + 7] = p.get_current_jaw_effort()
         # #print('it works')
+        if i >= start_cnt:
+        	state_cnt = i - start_cnt
 
-        states[i][0:dof-1] = p.get_current_joint_position()[0:dof-1]
-        states[i][7] = p.get_current_jaw_position()
-        states[i][dof:dof * 2-1] = p.get_current_joint_effort()[0:dof-1]
-        states[i][dof + 6] = p.get_current_jaw_effort()
+	        states[state_cnt][0:dof-1] = p.get_current_joint_position()[0:dof-1]
+	        states[state_cnt][7] = p.get_current_jaw_position()
+	        states[state_cnt][dof:dof * 2-1] = p.get_current_joint_effort()[0:dof-1]
+	        states[state_cnt][dof + 6] = p.get_current_jaw_effort()
         #print('it works')
 
     else:
@@ -96,12 +105,14 @@ while i < len(a) and not rospy.is_shutdown():
         # states[i][0:dof] = p.get_current_joint_position()[0:dof]
         # states[i][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
         # states[i][dof*2:dof*3] = p.get_current_joint_effort()[0:dof]
+        if i >= start_cnt:
+        	state_cnt = i - start_cnt
 
-        states[i][0:dof] = p.get_current_joint_position()[0:dof]
-        if dof == 7:
-        	# q8 = q2 + q3
-        	states[i][2] = states[i][1] + states[i][2]
-        states[i][dof:dof * 2] = p.get_current_joint_effort()[0:dof]
+	        states[state_cnt][0:dof] = p.get_current_joint_position()[0:dof]
+	        if dof == 7:
+	        	# q8 = q2 + q3
+	        	states[state_cnt][2] = states[state_cnt][1] + states[state_cnt][2]
+	        states[state_cnt][dof:dof * 2] = p.get_current_joint_effort()[0:dof]
 
     r.sleep()
     i = i + 1
