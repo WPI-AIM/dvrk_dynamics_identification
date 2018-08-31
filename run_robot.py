@@ -21,7 +21,7 @@ robotname = 'MTMR'
 
 speedscale = 1
 scale = 0.75
-scales = np.array([1, 0.7, 0.7, 1, 1, 1, 1])
+scales = np.array([0.8, 0.8, 0.8, 1, 1, 1, 1])
 
 # wait for a short period of time before recording data
 stable_time = 5
