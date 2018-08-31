@@ -4,7 +4,9 @@ import rospy
 import csv
 import numpy as np
 import dvrk
-
+import os.path
+import os
+import errno
 
 
 # Fist, several things we have to define before running it
@@ -18,7 +20,7 @@ testname = 'one'
 robotname = 'MTMR'
 
 speedscale = 1
-scale = 0.6
+scale = 0.7
 
 
 
@@ -45,10 +47,10 @@ elif robotname[0:3] == 'MTM':
 if not is_psm and dof == 7:
 	a[:, 2] = a[:, 2] - a[:, 1]
 
-r = rospy.Rate(freq * speedscale)
+
 p.home()
 
-
+rospy.sleep(3)
 
 # Home to start of trajectory based on CSV
 if is_psm and dof == 7:
@@ -64,7 +66,9 @@ print("jonits_array: {}".format(jonits_array))
 states = np.zeros((len(q), 2 * dof))
 
 print("states shape: {}".format(states.shape))
+rospy.sleep(3)
 
+r = rospy.Rate(freq * speedscale)
 # Excitation
 i = 0
 while i < len(a) and not rospy.is_shutdown():
@@ -101,8 +105,16 @@ while i < len(a) and not rospy.is_shutdown():
 
 
 # Save data
-name2 = './data/' + modelname + '/measured_trajectory/' + testname
-with open(name2 + '_results.csv', 'wb') as myfile:
+data_file_dir = './data/' + modelname + '/measured_trajectory/' + testname + '_results.csv'
+
+if not os.path.exists(os.path.dirname(data_file_dir)):
+    try:
+        os.makedirs(os.path.dirname(data_file_dir))
+    except OSError as exc:  # Guard against race condition
+        if exc.errno != errno.EEXIST:
+            raise
+
+with open(data_file_dir, 'w+') as myfile:
     wr = csv.writer(myfile, quoting=csv.QUOTE_NONE)
     for i in range(np.size(states, 0) - 1):
         wr.writerow(states[i])
