@@ -98,6 +98,9 @@ while i < len(a) and not rospy.is_shutdown():
         # states[i][dof*2:dof*3] = p.get_current_joint_effort()[0:dof]
 
         states[i][0:dof] = p.get_current_joint_position()[0:dof]
+        if dof == 7:
+        	# q8 = q2 + q3
+        	states[i][2] = states[i][1] + states[i][2]
         states[i][dof:dof * 2] = p.get_current_joint_effort()[0:dof]
 
     r.sleep()
