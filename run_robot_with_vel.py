@@ -12,7 +12,8 @@ import errno
 # Fist, several things we have to define before running it
 # modelname = 'test_psm_long'
 # modelname = 'mtm'
-modelname = 'mtm_3links_parallel'
+# modelname = 'mtm_3links_parallel'
+modelname = 'mtm_4links_parallel'
 
 testname = 'one'
 # testname = 'two'
@@ -20,10 +21,10 @@ testname = 'one'
 # robotname = 'PSM1'
 robotname = 'MTMR'
 
-speedscale = 0.85
+speedscale = 0.84
 scale = 0.75
 #scales = np.array([0.8, 0.8, 0.8, 1, 1, 1, 1])
-scales = np.array([0.85, 0.95, 0.95])
+scales = np.array([0.85, 0.95, 0.95, 1])
 
 # wait for a short period of time before recording data
 stable_time = 5
@@ -51,7 +52,7 @@ elif robotname[0:3] == 'MTM':
 
 # deal with the parallelogram, where q3 = q8 - q2
 if not is_psm:
-    if dof == 7 or dof == 3:
+    if dof == 7 or dof == 3 or dof == 4:
         a[:, 2] = a[:, 2] - a[:, 1]
 
 
@@ -117,7 +118,7 @@ while i < len(a) and not rospy.is_shutdown():
             states[state_cnt][0:dof] = p.get_current_joint_position()[0:dof]
             states[state_cnt][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
 
-            if dof == 7 or dof == 3:
+            if dof == 7 or dof == 3 or dof == 4:
                 states[state_cnt][2] = states[state_cnt][1] + states[state_cnt][2]
                 states[state_cnt][dof + 2] = states[state_cnt][dof + 1] + states[state_cnt][dof + 2]
             states[state_cnt][dof*2:dof * 3] = p.get_current_joint_effort()[0:dof]
