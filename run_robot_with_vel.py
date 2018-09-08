@@ -11,9 +11,9 @@ import errno
 
 # Fist, several things we have to define before running it
 # modelname = 'test_psm_long'
-# modelname = 'mtm'
+modelname = 'mtm'
 # modelname = 'mtm_3links_parallel'
-modelname = 'mtm_4links_parallel'
+# modelname = 'mtm_4links_parallel'
 
 testname = 'one'
 # testname = 'two'
@@ -21,10 +21,10 @@ testname = 'one'
 # robotname = 'PSM1'
 robotname = 'MTMR'
 
-speedscale = 0.84
+speedscale = 0.95
 scale = 0.75
 #scales = np.array([0.8, 0.8, 0.8, 1, 1, 1, 1])
-scales = np.array([0.85, 0.95, 0.95, 1])
+scales = np.array([0.85, 0.95, 0.95, 1, 1, 1, 1])
 
 # wait for a short period of time before recording data
 stable_time = 5
