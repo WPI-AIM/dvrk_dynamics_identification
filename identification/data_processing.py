@@ -11,23 +11,25 @@ from utils import ml2r, Lmr2I, inertia_vec2tensor, inertia_tensor2vec
 
 # the format of file should be q0, tau0, q1, tau1, ..., qn, taun
 def load_trajectory_data(file, freq):
-    f = np.array(pd.read_csv(file, sep=',',header=None))
+    f = np.array(pd.read_csv(file, sep=',', header=None))
     row, col = f.shape
     sample_num = row
-    dof = col/2
+    dof = col/3
 
     print(type(f), f.shape)
 
     t = np.array(range(sample_num), dtype=float) / freq
 
     q = np.zeros((row, dof))
+    dq = np.zeros((row, dof))
     tau = np.zeros((row, dof))
 
     for d in range(dof):
-        q[:, d] = f[:, 2*d]
-        tau[:, d] = f[:, 2*d + 1]
+        q[:, d] = f[:, d]
+        dq[:, d] = f[:, dof + d]
+        tau[:, d] = f[:, 2*dof + d]
 
-    return t, q, tau
+    return t, q, dq, tau
 
 
 def central_diff(array, div, n=2):
@@ -172,12 +174,12 @@ def butter_filtfilt(N, Wn, signal):
 #     return t, q, tau, reft, trajref
 #
 #
-def diff_and_filt_data(dof, h, t, q_raw, tau_raw, fc_q, fc_tau, fc_dq, fc_ddq, filter_order=6):
+def diff_and_filt_data(dof, h, t, q_raw, dq_raw, tau_raw, fc_q, fc_tau, fc_dq, fc_ddq, filter_order=6):
     s = q_raw[0].shape[0]
 
     q = np.zeros_like(q_raw)
-    dq = np.zeros_like(q_raw)
-    ddq = np.zeros_like(q_raw)
+    dq = np.zeros_like(dq_raw)
+    ddq = np.zeros_like(dq_raw)
     tau = np.zeros_like(tau_raw)
     wc_q = fc_q * 2 * math.pi * h
     wc_dq = fc_dq * 2 * math.pi * h
@@ -189,18 +191,19 @@ def diff_and_filt_data(dof, h, t, q_raw, tau_raw, fc_q, fc_tau, fc_dq, fc_ddq, f
         print(i)
         q[:, i] = butter_filtfilt(filter_order, wc_q, q_raw[:, i])
 
-        joint_i_dq_raw = central_diff(q_raw[:, i], h, 2)
-        dq[:, i] = butter_filtfilt(filter_order, wc_dq, joint_i_dq_raw)
-        # dq[:,i] = central_diff(q[:,i],h,2)
+        # joint_i_dq_raw = central_diff(q_raw[:, i], h, 2)
+        # dq[:, i] = butter_filtfilt(filter_order, wc_dq, joint_i_dq_raw)
+        dq[:, i] = butter_filtfilt(filter_order, wc_dq, dq_raw[:, i])
 
-        joint_i_ddq_raw = central_diff(joint_i_dq_raw, h, 2)
+        # joint_i_ddq_raw = central_diff(joint_i_dq_raw, h, 2)
+        joint_i_ddq_raw = central_diff(dq_raw[:, i], h, 2)
         ddq[:, i] = butter_filtfilt(filter_order, wc_ddq, joint_i_ddq_raw)
         # ddq[:,i] = central_diff( central_diff(q[:,i],h,2) ,h,2)
 
         tau[:, i] = butter_filtfilt(filter_order, wc_tau, tau_raw[:, i])
         # tau[:,i] = butter_lfilter( 3, wc_tau, tau_raw[:,i] )
 
-    cut_num = 5
+    cut_num = 200
 
     return t[cut_num:-cut_num],\
            q[cut_num:-cut_num, :], dq[cut_num:-cut_num, :], ddq[cut_num:-cut_num, :], tau[cut_num:-cut_num, :],\
@@ -348,11 +351,19 @@ def plot_meas_pred_tau(t, tau_m, tau_p):
 
     for i in range(dof):
         plt_tau = fig.add_subplot(dof, 1, i + 1)
-        plt_tau.plot(t, tau_m[:, i])
-        plt_tau.plot(t, tau_p[:, i])
-        plt_tau.set_xlabel(r'$t$ (s)')
+        plt_tau.margins(x=0.002, y=0.02)
+        plt_tau.plot(t, tau_m[:, i], 'r', label="Measured", linewidth=1)
+        plt_tau.plot(t, tau_p[:, i], 'b', label="Predicted", linewidth=1)
+        plt_tau.plot(t, tau_p[:, i] - tau_m[:, i], 'k--', label="Error", linewidth=1)
+        zeros = np.zeros(tau_p[:, i].shape)
+        plt_tau.plot(t, zeros, color='0.5', linewidth=0.75)
+        if i == dof-1:
+            plt_tau.set_xlabel(r'$t$ (s)')
+        plt_tau.set_ylabel(r'$\tau$ (Nm) or $f$ (N)')
+        # plt_tau.legend(['Measured', "Predicted"])
         if i == 0:
-            plt_tau.set_ylabel(r'$\tau$ (Nm) or $f$ (N)')
+            plt_tau.legend(bbox_to_anchor=(0., 1.52, 1., .102), loc='upper center', ncol=3,
+                           mode="expand", borderaxespad=0.)
 
     plt.tight_layout()
     plt.show()

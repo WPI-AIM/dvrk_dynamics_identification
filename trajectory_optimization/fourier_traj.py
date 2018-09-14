@@ -29,6 +29,11 @@ class FourierTraj:
             self.sample_num = frequency * final_time
             self.period = final_time
 
+
+        self.q = np.zeros((self.sample_num, self.dof))
+        self.dq = np.zeros((self.sample_num, self.dof))
+        self.ddq = np.zeros((self.sample_num, self.dof))
+
         self._gen_q_base()
 
     def _gen_q_base(self):
@@ -61,19 +66,10 @@ class FourierTraj:
         vprint(self.fourier_ddq_base)
 
     def fourier_base_x2q(self, x):
-        q = np.zeros((self.sample_num, self.dof))
-        dq = np.zeros((self.sample_num, self.dof))
-        ddq = np.zeros((self.sample_num, self.dof))
-
         for d in range(self.dof):
             start = d * (2 * self.order + 1)
             end = (d + 1) * (2 * self.order + 1)
-            q[:, d] = np.matmul(self.fourier_q_base, x[start:end])
-            dq[:, d] = np.matmul(self.fourier_dq_base, x[start:end])
-            ddq[:, d] = np.matmul(self.fourier_ddq_base, x[start:end])
-
-            # print('q{}: {}'.format(d, q[:, d]))
-            # print('dq{}: {}'.format(d, dq[:, d]))
-            # print('ddq{}: {}'.format(d, ddq[:, d]))
-
-        return q, dq, ddq
+            self.q[:, d] = np.matmul(self.fourier_q_base, x[start:end])
+            self.dq[:, d] = np.matmul(self.fourier_dq_base, x[start:end])
+            self.ddq[:, d] = np.matmul(self.fourier_ddq_base, x[start:end])
+        return self.q, self.dq, self.ddq

@@ -1,4 +1,7 @@
 from pyOpt import pySLSQP
+from pyOpt import pyNSGA2
+from pyOpt import pyNLPQL
+from pyOpt import pySOLVOPT
 import pyOpt
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,8 +10,8 @@ import csv
 import sympy
 
 
-q0_scale = np.pi/2
-fourier_scale = 2*np.pi
+q0_scale = np.pi
+fourier_scale = 10*np.pi
 
 # joint constraints
 # [(joint_var, q_low, q_upper, dq_low, dq_upper), ..., (...)]
@@ -38,7 +41,7 @@ class TrajOptimizer:
         self._ab_max = ab_max
 
         # sample number for the highest term
-        self._sample_point = 10
+        self._sample_point = 12
 
         self.fourier_traj = FourierTraj(self._dyn.dof, self._order, self._base_freq,
                                         sample_num_per_period=self._sample_point)
@@ -82,7 +85,7 @@ class TrajOptimizer:
         #print('H: ', self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :])
 
         f = np.linalg.cond(self.H)
-        # #print(f)
+        print("cond: {}".format(f))
         # y = self.H
         # xmax, xmin = y.max(), y.min()
         # y = (y - xmin) / (xmax - xmin)
@@ -205,13 +208,30 @@ class TrajOptimizer:
         # print(self._opt_prob)
         #x = np.random.random((self._dyn.rbt_def.dof * (2*self._order+1)))
         #print(self._obj_func(x))
+
+        # PSQP
+        # slsqp = pyOpt.pyPSQP.PSQP()
+        # slsqp.setOption('MIT', 2)
+        # slsqp.setOption('IPRINT', 2)
+
+        # COBYLA
+        #slsqp = pyOpt.pyCOBYLA.COBYLA()
+
+        # Genetic Algorithm
+        #slsqp = pyOpt.pyNSGA2.NSGA2()
+
+        # SLSQP
         slsqp = pyOpt.pySLSQP.SLSQP()
-        #slsqp = pyOpt.pyPSQP.PSQP()
-
         slsqp.setOption('IPRINT', 0)
-        #slsqp.setOption('MAXIT', 2)
+        # slsqp.setOption('MAXIT', 300)
+        #slsqp.setOption('ACC', 0.00001)
 
-        [fstr, xstr, inform] = slsqp(self._opt_prob, sens_type='FD')
+        # SOLVOPT
+        # slsqp = pyOpt.pySOLVOPT.SOLVOPT()
+        # slsqp.setOption('maxit', 5)
+
+        #[fstr, xstr, inform] = slsqp(self._opt_prob, sens_type='FD')
+        [fstr, xstr, inform] = slsqp(self._opt_prob)
 
         self.f_result = fstr
         self.x_result = xstr

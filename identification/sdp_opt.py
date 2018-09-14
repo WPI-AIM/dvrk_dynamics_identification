@@ -7,9 +7,9 @@ from utils import gen_DLki_mat
 
 class SDPOpt:
     def __init__(self, W, tau, rbt_def, value_constraints=[], spring_constraints=[]):
-        self.small_positive_num = 0.000001
-        self.min_Fc = 0.005
-        self.min_Fv = 0.005
+        self.small_positive_num = 0.00001
+        self.min_Fc = 0.001
+        self.min_Fv = 0.001
         self.min_Ia = 0.02
 
         self._W = W
@@ -68,7 +68,7 @@ class SDPOpt:
 
             # constraint order: (min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z)
             if len(self._value_constraints) != 0:
-                min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z, max_Fc, max_Fv, max_Fo = self._value_constraints[i_link]
+                min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z, max_Fc, max_Fv, max_Fo = self._value_constraints[f - 1]
 
                 if self._rbt_def.use_inertia[f]:
                     # mass of center position
@@ -147,10 +147,12 @@ class SDPOpt:
         print("Solving problem...")
         self._prob = cp.Problem(self._obj, self._constraints)
 
-        result = self._prob.solve(solver=cp.SCS)
+        result = self._prob.solve(solver=cp.SCS, verbose=True, max_iters=10000)
+        # result = self._prob.solve(solver=cp.CVXOPT, verbose=True)
 
         self.x_result = self._x.value
         print(self._x.value)
+        print(result)
 
 
 

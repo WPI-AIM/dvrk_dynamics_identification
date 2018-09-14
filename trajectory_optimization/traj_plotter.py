@@ -38,10 +38,11 @@ linestyles = [('solid',               (0, ())),
 
 
 class TrajPlotter:
-    def __init__(self, fourier_traj, frame_traj = [], const_frame_num = []):
+    def __init__(self, fourier_traj, frame_traj = [], const_frame_num = [], coordinates = []):
         self._fourier_traj = fourier_traj
         self._frame_traj = frame_traj
         self._const_frame_ind = const_frame_num
+        self._coordinates = coordinates
         #print(self._frame_traj)
 
     def plot_desired_traj(self, fourier_x):
@@ -51,13 +52,18 @@ class TrajPlotter:
 
         fig = plt.figure(1)
         plt_q = fig.add_subplot(311)
-        plt_q.set_title("Optimal Excitation Trajectory")
+        #plt_q.set_title("Optimal Excitation Trajectory")
 
         # position
         for d in range(self._fourier_traj.dof):
             _, linestyle = linestyles[d]
-            plt_q.plot(x, q[:, d], label=(r"$q_"+str(d+1)+"$"), linestyle=linestyle)
-        plt_q.legend()
+            co_num = str(d + 1)
+            if self._coordinates != []:
+                co_num = self._coordinates[d].name[1:]
+            plt_q.plot(x, q[:, d], label=(r"$q_" + co_num +"$"), linestyle=linestyle)
+        #plt_q.legend()
+        plt_q.legend(bbox_to_anchor=(0., 1.12, 1., .102), loc='upper center', ncol=self._fourier_traj.dof,
+                     mode="expand", borderaxespad=0.)
 
         plt_q.set_ylabel(r'$q$ (rad or m)')
 
@@ -67,7 +73,7 @@ class TrajPlotter:
             _, linestyle = linestyles[d]
             plt_dq.plot(x, dq[:, d], label=(r"$\dot{q}_"+str(d+1)+"$"), linestyle=linestyle)
 
-        plt_dq.legend()
+        # plt_dq.legend()
         plt_dq.set_ylabel(r'$\dot{q}$ (rad/s or m/s)')
 
         # acceleration
@@ -77,7 +83,7 @@ class TrajPlotter:
             _, linestyle = linestyles[d]
             plt_ddq.plot(x, ddq[:, d], label=(r"$\ddot{q}_"+str(d+1)+"$"), linestyle=linestyle)
 
-        plt_ddq.legend()
+        # plt_ddq.legend()
         plt_ddq.set_xlabel(r'$t$ (s)')
         plt_ddq.set_ylabel(r'$\ddot{q}$ (rad/s$^2$ or m/s$^2$)')
         #plt.tight_layout()
