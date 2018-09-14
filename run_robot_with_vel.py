@@ -11,8 +11,9 @@ import errno
 
 # Fist, several things we have to define before running it
 # modelname = 'test_psm_long'
-# modelname = 'mtm'
-modelname = 'mtm_3links_parallel'
+modelname = 'mtm'
+# modelname = 'mtm_3links_parallel'
+# modelname = 'mtm_4links_parallel'
 
 testname = 'one'
 # testname = 'two'
@@ -20,10 +21,10 @@ testname = 'one'
 # robotname = 'PSM1'
 robotname = 'MTMR'
 
-speedscale = 1
+speedscale = 0.95
 scale = 0.75
 #scales = np.array([0.8, 0.8, 0.8, 1, 1, 1, 1])
-scales = np.array([1, 0.8, 0.8])
+scales = np.array([0.85, 0.95, 0.95, 1, 1, 1, 1])
 
 # wait for a short period of time before recording data
 stable_time = 5
@@ -51,8 +52,8 @@ elif robotname[0:3] == 'MTM':
 
 # deal with the parallelogram, where q3 = q8 - q2
 if not is_psm:
-	if dof == 7 or dof == 3:
-		a[:, 2] = a[:, 2] - a[:, 1]
+    if dof == 7 or dof == 3 or dof == 4:
+        a[:, 2] = a[:, 2] - a[:, 1]
 
 
 p.home()
@@ -65,14 +66,14 @@ if is_psm and dof == 7:
     p.move_joint_some(a[0, 0:dof-1], jonits_array)
     p.move_jaw(q[0, -1])
 else:
-	jonits_array = np.array([d for d in range(dof)])
-	p.move_joint_some(a[0, :], jonits_array)
+    jonits_array = np.array([d for d in range(dof)])
+    p.move_joint_some(a[0, :], jonits_array)
 print("jonits_array: {}".format(jonits_array))
 
 #states = np.zeros((len(q), 3 * dof))
 start_cnt = int(freq*stable_time)
 max_state_num = len(q) - start_cnt
-states = np.zeros((max_state_num, 2 * dof))
+states = np.zeros((max_state_num, 3 * dof))
 
 print("states shape: {}".format(states.shape))
 rospy.sleep(3)
@@ -94,12 +95,16 @@ while i < len(a) and not rospy.is_shutdown():
         # #states[i][2 * dof + 7] = p.get_current_jaw_effort()
         # #print('it works')
         if i >= start_cnt:
-        	state_cnt = i - start_cnt
+            state_cnt = i - start_cnt
 
-	        states[state_cnt][0:dof-1] = p.get_current_joint_position()[0:dof-1]
-	        states[state_cnt][7] = p.get_current_jaw_position()
-	        states[state_cnt][dof:dof * 2-1] = p.get_current_joint_effort()[0:dof-1]
-	        states[state_cnt][dof + 6] = p.get_current_jaw_effort()
+            states[state_cnt][0:dof - 1] = p.get_current_joint_position()[0:dof-1]
+            states[state_cnt][dof-1] = p.get_current_jaw_position()
+            
+            states[state_cnt][dof:dof*2 - 1] = p.get_current_joint_velocity()[0:dof-1]
+            states[state_cnt][dof*2 - 1] = p.get_current_jaw_velocity()
+
+            states[state_cnt][dof*2:dof * 3 - 1] = p.get_current_joint_effort()[0:dof-1]
+            states[state_cnt][dof*3 - 1] = p.get_current_jaw_effort()
         #print('it works')
 
     else:
@@ -109,13 +114,14 @@ while i < len(a) and not rospy.is_shutdown():
         # states[i][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
         # states[i][dof*2:dof*3] = p.get_current_joint_effort()[0:dof]
         if i >= start_cnt:
-        	state_cnt = i - start_cnt
+            state_cnt = i - start_cnt
+            states[state_cnt][0:dof] = p.get_current_joint_position()[0:dof]
+            states[state_cnt][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
 
-	        states[state_cnt][0:dof] = p.get_current_joint_position()[0:dof]
-	        if dof == 7 or dof == 3:
-	        	# q8 = q2 + q3
-	        	states[state_cnt][2] = states[state_cnt][1] + states[state_cnt][2]
-	        states[state_cnt][dof:dof * 2] = p.get_current_joint_effort()[0:dof]
+            if dof == 7 or dof == 3 or dof == 4:
+                states[state_cnt][2] = states[state_cnt][1] + states[state_cnt][2]
+                states[state_cnt][dof + 2] = states[state_cnt][dof + 1] + states[state_cnt][dof + 2]
+            states[state_cnt][dof*2:dof * 3] = p.get_current_joint_effort()[0:dof]
 
     r.sleep()
     i = i + 1
