@@ -83,6 +83,7 @@ class TrajOptimizer:
             self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :] = self._dyn.H_b_func(*vars_input)
 
         #print('H: ', self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :])
+        self.H /= np.subtract(self.H.max(axis=0), self.H.min(axis=0))
 
         f = np.linalg.cond(self.H)
         print("cond: {}".format(f))
@@ -241,6 +242,15 @@ class TrajOptimizer:
         #print('inform: ', inform)
 
         print self._opt_prob.solution(0)
+
+    def calc_normalize_mat(self):
+        q, dq, ddq = self.fourier_traj.fourier_base_x2q(self.x_result)
+
+        for n in range(self.sample_num):
+            vars_input = q[n, :].tolist() + dq[n, :].tolist() + ddq[n, :].tolist()
+            self.H[n*self._dyn.dof:(n+1)*self._dyn.dof, :] = self._dyn.H_b_func(*vars_input)
+
+        return self.H.max(axis=0) - self.H.min(axis=0)
 
     def calc_frame_traj(self):
         q, dq, ddq = self.fourier_traj.fourier_base_x2q(self.x_result)
