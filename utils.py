@@ -90,7 +90,7 @@ def gen_DLki_mat():
     return M
 
 
-def save_data (folder, name, data):
+def save_data(folder, name, data):
     model_file = folder + name + '.pkl'
 
     if not os.path.exists(os.path.dirname(model_file)):
