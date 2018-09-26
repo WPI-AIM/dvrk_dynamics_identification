@@ -38,6 +38,7 @@ class Geometry:
         t = sympy.symbols('t')
 
         for num in self.rbt_df.link_nums:
+            print('Frame: {}'.format(num))
             if num == 0:
                 self.T_0n[num] = self.rbt_df.dh_T[num]
                 continue

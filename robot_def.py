@@ -41,7 +41,7 @@ else:
 
 
 class RobotDef:
-    def __init__(self, params, springs, dh_convention='mdh', friction_type=['viscous']):
+    def __init__(self, params, springs, tendon_couplings, dh_convention='mdh', friction_type=['viscous']):
 
         self.frame_num = len(params)
         self.link_nums = [p[0] for p in params]
@@ -55,6 +55,7 @@ class RobotDef:
         self.use_Ia = [p[8] for p in params]
         self.use_friction = [p[9] for p in params]
         self.springs = springs
+        self.tendon_couplings = tendon_couplings
         self.dh_convention = dh_convention
         if self.dh_convention in ['sdh', 'std']:
             self._dh_transmat = _standard_dh_transfmat
