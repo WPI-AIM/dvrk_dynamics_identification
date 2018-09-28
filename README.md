@@ -20,9 +20,8 @@ to solve the dynamics model identification of it. This software framework was de
     * Ordinary Least Square (OLS)
     * ~~Weighted Least Square (WLS)~~
     * Semi-definite Programming (SDP)
-### Yet to be done
-
 * Excitation of robots, using dvrk ROS library
+### Yet to be done
 * Output of the identified paramters
 * Output of C++ or Python code of identified dynamic model for control use 
 
@@ -34,8 +33,8 @@ to solve the dynamics model identification of it. This software framework was de
 * Regularize output print
 * ~~Add motor inertia~~
 * ~~Add spring parameters into dynamics model~~
-* Optimize the code to make it faster
-* Create the model of the MTM
+* ~~Optimize the code to make it faster~~
+* ~~Create the model of the MTM~~
 * ~~Create the model of the PSM~~
 * Identification of the dynamic model of the MTM
 * Identification of the dynamic model of the PSM

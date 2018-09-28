@@ -8,6 +8,7 @@ class RobotModel:
     def __init__(self, dyn):
         self.dof = dyn.rbt_def.dof
         self.coordinates = dyn.rbt_def.coordinates
+        self.coordinates_joint_type = dyn.rbt_def.coordinates_joint_type
         self.base_num = dyn.base_num
         self.base_param = dyn.base_param
         self.std_param = dyn.rbt_def.std_params
