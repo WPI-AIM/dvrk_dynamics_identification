@@ -343,7 +343,7 @@ def plot_trajectory_data(t, q_raw, q_f, dq_f, ddq_f, tau_raw, tau_f):
     plt.show()
 
 
-def plot_meas_pred_tau(t, tau_m, tau_p, joint_type):
+def plot_meas_pred_tau(t, tau_m, tau_p, joint_type, coordinates):
     sample_num, dof = tau_m.shape
     t = t - t[0]
 
@@ -360,9 +360,9 @@ def plot_meas_pred_tau(t, tau_m, tau_p, joint_type):
         if i == dof-1:
             plt_tau.set_xlabel(r'$t$ (s)')
         if joint_type[i] == 'R':
-            plt_tau.set_ylabel(r'$\tau$ (Nm)')
+            plt_tau.set_ylabel(r'$\tau_{}$ (Nm)'.format(coordinates[i].name[1:]))
         else:
-            plt_tau.set_ylabel(r'$f$ (N)')
+            plt_tau.set_ylabel(r'$f_{}$ (N)'.format(coordinates[i].name[1:]))
         # plt_tau.legend(['Measured', "Predicted"])
         if i == 0:
             plt_tau.legend(bbox_to_anchor=(0.5, 1.52, 0.5, .102), loc='upper center', ncol=3,
