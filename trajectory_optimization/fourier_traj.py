@@ -1,5 +1,5 @@
 import numpy as np
-
+import math
 
 verbose = False
 
@@ -15,19 +15,29 @@ else:
 
 
 class FourierTraj:
-    def __init__(self, dof, order, base_freq, sample_num_per_period=10):
+    def __init__(self, dof, order, base_freq, sample_num_per_period=10, frequency='nan', final_time=10):
         self.dof = dof
         self.order = order
         self.base_freq = base_freq
         self.sample_num_per_period = sample_num_per_period
-        self.sample_num = self.order * self.sample_num_per_period + 1
-        #self.coordinates = coordinates
+
+        # if no specified frequency and final_time, generate a one-period trajectory.
+        if math.isnan(float(frequency)):
+            self.sample_num = self.order * self.sample_num_per_period + 1
+            self.period = 1.0 / self.base_freq
+        else:
+            self.sample_num = frequency * final_time
+            self.period = final_time
+
+
+        self.q = np.zeros((self.sample_num, self.dof))
+        self.dq = np.zeros((self.sample_num, self.dof))
+        self.ddq = np.zeros((self.sample_num, self.dof))
 
         self._gen_q_base()
 
     def _gen_q_base(self):
-        period = 1.0 / self.base_freq
-        self.t = np.linspace(0, period, num=self.sample_num)
+        self.t = np.linspace(0, self.period, num=self.sample_num)
 
         self.fourier_q_base = np.zeros((self.sample_num, 2 * self.order + 1))
         self.fourier_dq_base = np.zeros((self.sample_num, 2 * self.order + 1))
@@ -56,19 +66,10 @@ class FourierTraj:
         vprint(self.fourier_ddq_base)
 
     def fourier_base_x2q(self, x):
-        q = np.zeros((self.sample_num, self.dof))
-        dq = np.zeros((self.sample_num, self.dof))
-        ddq = np.zeros((self.sample_num, self.dof))
-
         for d in range(self.dof):
             start = d * (2 * self.order + 1)
             end = (d + 1) * (2 * self.order + 1)
-            q[:, d] = np.matmul(self.fourier_q_base, x[start:end])
-            dq[:, d] = np.matmul(self.fourier_dq_base, x[start:end])
-            ddq[:, d] = np.matmul(self.fourier_ddq_base, x[start:end])
-
-            # print('q{}: {}'.format(d, q[:, d]))
-            # print('dq{}: {}'.format(d, dq[:, d]))
-            # print('ddq{}: {}'.format(d, ddq[:, d]))
-
-        return q, dq, ddq
+            self.q[:, d] = np.matmul(self.fourier_q_base, x[start:end])
+            self.dq[:, d] = np.matmul(self.fourier_dq_base, x[start:end])
+            self.ddq[:, d] = np.matmul(self.fourier_ddq_base, x[start:end])
+        return self.q, self.dq, self.ddq

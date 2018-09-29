@@ -6,7 +6,7 @@ from frame_drawer import FrameDrawer
 from utils import tranlation_transfmat, so32vec
 
 
-verbose = True
+verbose = False
 
 if verbose:
     def vprint(*args):
@@ -23,6 +23,7 @@ class Geometry:
     def __init__(self, rbt_def):
         self.rbt_df = rbt_def
         self._cal_geom()
+        self._calc_functions()
         # self.draw_geom()
 
     def _cal_geom(self):
@@ -37,6 +38,7 @@ class Geometry:
         t = sympy.symbols('t')
 
         for num in self.rbt_df.link_nums:
+            print('Frame: {}'.format(num))
             if num == 0:
                 self.T_0n[num] = self.rbt_df.dh_T[num]
                 continue
@@ -48,6 +50,8 @@ class Geometry:
             self.p_c[num] = self.T_0nc[num][0:3, 3]
             vprint('v_cw{}'.format(num))
 
+
+        #TO MAKE FASTER : COMMENT THIS
             v_cw = sympy.diff(self.p_c[num].subs(self.rbt_df.subs_q2qt), t)
             v_cw = v_cw.subs(self.rbt_df.subs_dqt2dq + self.rbt_df.subs_qt2q)
             self.v_cw[num] = sympy.simplify(v_cw)
@@ -69,17 +73,34 @@ class Geometry:
         vprint('w_b')
         vprint(self.w_b)
 
-    def draw_geom(self):
-        frame_drawer = FrameDrawer((-0.6, 0.2), (-0.6, 0.6), (-0.6, 0.2))
+    def _calc_functions(self):
+        self.p_n_func = ["" for x in range(self.rbt_df.frame_num)]
+        #self.p_n_func = np.zeros(self.rbt_df.dof)
+        input_vars = tuple(self.rbt_df.coordinates)
 
-        subs_q2zero = [(q, 0) for q in self.rbt_df.coordinates]
+        for num in range(self.rbt_df.frame_num):
+            self.p_n_func[num] = sympy.lambdify(input_vars, self.p_n[num])
+
+    def draw_geom(self, angle=0):
+        frame_drawer = FrameDrawer((-0.6, 0.4), (-0.4, 0.4), (-0.6, 0.2))
+
+        if angle == 0:
+            subs_q2zero = [(q, angle) for q in self.rbt_df.coordinates]
+
+        else :
+            subs_q2zero = []
+            x = self.rbt_df.coordinates
+            for i in range(len(x)):
+                subs_q2zero.append((x[i], angle[i]))
 
         for num in self.rbt_df.link_nums:
             T = np.matrix(self.T_0n[num].subs(subs_q2zero))
             frame_drawer.draw_frame(T, num)
-
+            #print(T[0:3, 3])
             if num != 0:
                 T_prev = np.matrix(self.T_0n[self.rbt_df.prev_link_num[num]].subs(subs_q2zero))
                 frame_drawer.drawSegment(T_prev, T)
 
         frame_drawer.show()
+
+

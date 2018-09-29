@@ -39,8 +39,9 @@ if verbose:
 else:
     vprint = lambda *a: None      # do-nothing function
 
+
 class RobotDef:
-    def __init__(self, params, dh_convention='mdh', friction_type=['viscous']):
+    def __init__(self, params, springs, tendon_couplings, dh_convention='mdh', friction_type=['viscous']):
 
         self.frame_num = len(params)
         self.link_nums = [p[0] for p in params]
@@ -50,6 +51,11 @@ class RobotDef:
         self.dh_alpha = [p[4] for p in params]
         self.dh_d = [p[5] for p in params]
         self.dh_theta = [p[6] for p in params]
+        self.use_inertia = [p[7] for p in params]
+        self.use_Ia = [p[8] for p in params]
+        self.use_friction = [p[9] for p in params]
+        self.springs = springs
+        self.tendon_couplings = tendon_couplings
         self.dh_convention = dh_convention
         if self.dh_convention in ['sdh', 'std']:
             self._dh_transmat = _standard_dh_transfmat
@@ -58,7 +64,8 @@ class RobotDef:
         self.friction_type = friction_type
         vprint("frame_number: ", self.frame_num)
         vprint(self.succ_link_num)
-        vprint(sympy.Matrix(self.dh_a + self.dh_alpha + self.dh_d + self.dh_theta).free_symbols)
+        #print(sympy.Matrix(self.dh_a + self.dh_alpha + self.dh_d + self.dh_theta))
+        vprint(sympy.Matrix([self.dh_a + self.dh_alpha + self.dh_d + self.dh_theta]).free_symbols)
         #print(sympy.Matrix(self.dh_a + self.dh_alpha, self.dh_d + self.dh_theta))
         #for p in dh_params:
 
@@ -69,13 +76,15 @@ class RobotDef:
 
     def _gen_coordinates(self):
         self.coordinates = []
+        self.coordinates_joint_type = []
         # self.joint_coordinate = list(range(self.frame_num))
         for num in self.link_nums:
             for s in self.dh_T[num].free_symbols:
                 if s not in self.coordinates:
                     self.coordinates += [s]
+                    self.coordinates_joint_type += [self.joint_type[num]]
         self.dof = len(self.coordinates)
-        print(self.coordinates)
+        vprint(self.coordinates)
 
         self.d_coordinates = [new_sym('d'+co.name) for co in self.coordinates]
         self.dd_coordinates = [new_sym('dd' + co.name) for co in self.coordinates]
@@ -102,17 +111,46 @@ class RobotDef:
         self.subs_ddqt2ddq = [(ddqt, ddq) for ddq, ddqt in zip(self.dd_coordinates, self.dd_coordinates_t)]
         vprint(self.subs_ddq2ddqt)
 
+        self.dq_for_frame = list(range(self.frame_num))
+        self.ddq_for_frame = list(range(self.frame_num))
+
+        for i in range(self.frame_num):
+            q = None
+            if self.joint_type[i] == "P":
+                q = self.dh_d[i]
+            elif self.joint_type[i] == "R":
+                q = self.dh_theta[i]
+            else:
+                continue
+
+            qt = q.subs(self.subs_q2qt)
+            dqt = sympy.diff(qt, sympy.Symbol('t'))
+            dq = dqt.subs(self.subs_dqt2dq)
+
+            self.dq_for_frame[i] = dq
+
+            ddqt = sympy.diff(dqt, sympy.Symbol('t'))
+            ddq = ddqt.subs(self.subs_ddqt2ddq)
+
+            self.ddq_for_frame[i] = ddq
+
+
     def _gen_dh_transfm(self):
         self.dh_T = []
+        self.joint_type = []
         for num in self.link_nums:
             subs_dh = [(_dh_alpha, self.dh_alpha[num]), (_dh_a, self.dh_a[num]), (_dh_d, self.dh_d[num]), (_dh_theta, self.dh_theta[num])]
             self.dh_T.append(self._dh_transmat.subs(subs_dh))
+
+            if len(sympy.Matrix([self.dh_d[num]]).free_symbols) > 0:
+                self.joint_type.append("P")  # Prismatic
+            elif len(sympy.Matrix([self.dh_theta[num]]).free_symbols) > 0:
+                self.joint_type.append("R")  # Revolute
+            else:
+                self.joint_type.append("A")  # Assitive
         #print(self.dh_T)
 
     def _gen_params(self):
-        self.std_params = []
-        self.bary_params = []
-
         self.m = list(range(self.frame_num))
         self.l = list(range(self.frame_num))
         self.r = list(range(self.frame_num))
@@ -125,6 +163,8 @@ class RobotDef:
         self.Fc = list(range(self.frame_num))
         self.Fv = list(range(self.frame_num))
         self.Fo = list(range(self.frame_num))
+        self.Ia = list(range(self.frame_num))
+        self.K = list(range(len(self.springs)))
 
         for num in self.link_nums[1:]:
             self.m[num] = new_sym('m'+str(num))
@@ -146,24 +186,54 @@ class RobotDef:
             if 'offset' in self.friction_type:
                 self.Fo[num] = new_sym('Fo' + str(num))
 
+            if self.use_Ia[num]:
+                self.Ia[num] = new_sym('Ia' + str(num))
+
+        self.spring_num = len(self.springs)
+        for i in range(self.spring_num):
+            self.K[i] = new_sym('K' + str(i))
+
         vprint(self.m)
         vprint(self.l)
         vprint(self.r)
         vprint(self.I_vec, self.L_vec)
+        vprint(self.K)
 
     def _dyn_params(self):
-        self.params = []
+        self.std_params = []
+        self.bary_params = []
 
         for num in self.link_nums[1:]:
-            self.params += self.L_vec[num]
-            self.params += self.l[num]
-            self.params += [self.m[num]]
+            if self.use_inertia[num]:
+                self.bary_params += self.L_vec[num]
+                self.bary_params += self.l[num]
+                self.bary_params += [self.m[num]]
 
-            if 'Coulomb' in self.friction_type:
-                self.params += [self.Fc[num]]
-            if 'viscous' in self.friction_type:
-                self.params += [self.Fv[num]]
-            if 'offset' in self.friction_type:
-                self.params += [self.Fo[num]]
+                self.std_params += self.I_vec[num]
+                self.std_params += self.r[num]
+                self.std_params += [self.m[num]]
 
-        vprint(self.params)
+            if self.use_friction[num]:
+                if 'Coulomb' in self.friction_type:
+                    self.bary_params += [self.Fc[num]]
+                    self.std_params += [self.Fc[num]]
+                if 'viscous' in self.friction_type:
+                    self.bary_params += [self.Fv[num]]
+                    self.std_params += [self.Fv[num]]
+                if 'offset' in self.friction_type:
+                    self.bary_params += [self.Fo[num]]
+                    self.std_params += [self.Fo[num]]
+
+            if self.use_Ia[num]:
+                self.bary_params += [self.Ia[num]]
+                self.std_params += [self.Ia[num]]
+
+        for k in self.K:
+            self.bary_params += [k]
+            self.std_params += [k]
+
+        vprint("Barycentric parameters:")
+        vprint(sympy.Matrix(self.bary_params))
+
+        vprint("Standard parameters:")
+        vprint(sympy.Matrix(self.std_params))
