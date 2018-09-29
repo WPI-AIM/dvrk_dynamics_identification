@@ -188,7 +188,6 @@ def diff_and_filt_data(dof, h, t, q_raw, dq_raw, tau_raw, fc_q, fc_tau, fc_dq, f
 
     print('q_raw shape: {}'.format(q_raw.shape))
     for i in range(dof):
-        print(i)
         q[:, i] = butter_filtfilt(filter_order, wc_q, q_raw[:, i])
 
         # joint_i_dq_raw = central_diff(q_raw[:, i], h, 2)
