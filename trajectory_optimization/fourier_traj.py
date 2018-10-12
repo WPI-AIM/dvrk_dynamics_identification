@@ -52,8 +52,8 @@ class FourierTraj:
                 self.fourier_q_base[n, o + 1] = np.sin(phase) / c
                 self.fourier_q_base[n, self.order + o + 1] = -np.cos(phase) / c
 
-                self.fourier_dq_base[n, o + 1] = np.sin(phase)
-                self.fourier_dq_base[n, self.order + o + 1] = np.cos(phase)
+                self.fourier_dq_base[n, o + 1] = np.cos(phase)
+                self.fourier_dq_base[n, self.order + o + 1] = np.sin(phase)
 
                 self.fourier_ddq_base[n, o + 1] = -c * np.sin(phase)
                 self.fourier_ddq_base[n, self.order + o + 1] = c * np.cos(phase)
