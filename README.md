@@ -3,6 +3,12 @@
 There are parallelograms, springs and counter weights in daVinci surgical system so that we can not use existing tools
 to solve the dynamics model identification of it. This software framework was developed to solve these problems.
 
+## Procedure
+
+<p align="center">
+  <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/flow/procedure.png" width="540" title="hover text">
+
+</p>
 
 ## Features
 ### Finished
