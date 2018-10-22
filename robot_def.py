@@ -122,7 +122,6 @@ class RobotDef:
                 q = self.dh_theta[i]
             else:
                 continue
-
             qt = q.subs(self.subs_q2qt)
             dqt = sympy.diff(qt, sympy.Symbol('t'))
             dq = dqt.subs(self.subs_dqt2dq)
@@ -148,6 +147,7 @@ class RobotDef:
                 self.joint_type.append("R")  # Revolute
             else:
                 self.joint_type.append("A")  # Assitive
+        # print(self.joint_type)
         #print(self.dh_T)
 
     def _gen_params(self):

@@ -15,18 +15,21 @@ else:
 
 
 class FourierTraj:
-    def __init__(self, dof, order, base_freq, sample_num_per_period=10, frequency='nan', final_time=10):
+    def __init__(self, dof, order, base_freq, sample_num_per_period=10, frequency='nan', stable_time=0, final_time=10):
         self.dof = dof
         self.order = order
         self.base_freq = base_freq
         self.sample_num_per_period = sample_num_per_period
+        self.stable_time = stable_time
+        self.frequency = frequency
 
         # if no specified frequency and final_time, generate a one-period trajectory.
         if math.isnan(float(frequency)):
             self.sample_num = self.order * self.sample_num_per_period + 1
             self.period = 1.0 / self.base_freq
+            self.frequency = self.sample_num/(final_time + stable_time)
         else:
-            self.sample_num = frequency * final_time
+            self.sample_num = frequency * (final_time + stable_time)
             self.period = final_time
 
 
@@ -45,18 +48,26 @@ class FourierTraj:
 
         for n in range(self.sample_num):
             self.fourier_q_base[n, 0] = 1
+
+            if not self.stable_time == 0:
+                ramp_up = float(n)/float(self.stable_time * self.frequency)
+                if ramp_up > 1:
+                    ramp_up = 1
+            else:
+                ramp_up = 1
+
             for o in range(self.order):
                 phase = 2 * np.pi * (o + 1) * self.t[n] * self.base_freq
 
                 c = 2 * np.pi * (o + 1) * self.base_freq
-                self.fourier_q_base[n, o + 1] = np.sin(phase) / c
-                self.fourier_q_base[n, self.order + o + 1] = -np.cos(phase) / c
+                self.fourier_q_base[n, o + 1] = ramp_up * np.sin(phase) / c
+                self.fourier_q_base[n, self.order + o + 1] = -ramp_up * np.cos(phase) / c
 
-                self.fourier_dq_base[n, o + 1] = np.cos(phase)
-                self.fourier_dq_base[n, self.order + o + 1] = np.sin(phase)
+                self.fourier_dq_base[n, o + 1] =  ramp_up * np.cos(phase)
+                self.fourier_dq_base[n, self.order + o + 1] = ramp_up * np.sin(phase)
 
-                self.fourier_ddq_base[n, o + 1] = -c * np.sin(phase)
-                self.fourier_ddq_base[n, self.order + o + 1] = c * np.cos(phase)
+                self.fourier_ddq_base[n, o + 1] = -ramp_up *c * np.sin(phase)
+                self.fourier_ddq_base[n, self.order + o + 1] = ramp_up * c * np.cos(phase)
 
         vprint('fourier_q_base:')
         vprint(self.fourier_q_base)
