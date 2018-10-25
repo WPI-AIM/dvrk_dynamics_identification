@@ -1,6 +1,6 @@
 # A dynamic model identification framework developed for daVinci Suigical System
 
-There are parallelograms, springs and counter weights in daVinci surgical system so that we can not use existing tools
+There are parallelograms, springs, tendon couplings, and counterweight in da Vinci surgical system so that we can not use existing tools
 to solve the dynamics model identification of it. This software framework was developed to solve these problems.
 
 
@@ -18,27 +18,17 @@ to solve the dynamics model identification of it. This software framework was de
     * Remove the data whose velocity is close to zero to decrease the noise for Coulomb friction
 * Identification
     * Ordinary Least Square (OLS)
-    * ~~Weighted Least Square (WLS)~~
+    * Weighted Least Square (WLS)
     * Semi-definite Programming (SDP)
-### Yet to be done
-
 * Excitation of robots, using dvrk ROS library
+### Yet to be done
 * Output of the identified paramters
 * Output of C++ or Python code of identified dynamic model for control use 
 
-### Another to-do list
-* ~~Add friction parameters into dynamic model~~
-* ~~Add Cartisian constraints in optimal excitation trajectory generation~~
-* ~~Add constraints of mass, center of mass and friction in SDP~~
-* ~~Save and load parameters for each step to avoid repetitive work every time~~
 * Regularize output print
-* ~~Add motor inertia~~
-* ~~Add spring parameters into dynamics model~~
-* Optimize the code to make it faster
-* Create the model of the MTM
-* ~~Create the model of the PSM~~
+
 * Identification of the dynamic model of the MTM
-* Identification of the dynamic model of the PSM
+* ~~Identification of the dynamic model of the PSM~~
 
 
 ## Requirements

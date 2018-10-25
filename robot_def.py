@@ -41,7 +41,7 @@ else:
 
 
 class RobotDef:
-    def __init__(self, params, springs, tendon_couplings, dh_convention='mdh', friction_type=['viscous']):
+    def __init__(self, params, springs, dh_convention='mdh', friction_type=['viscous']):
 
         self.frame_num = len(params)
         self.link_nums = [p[0] for p in params]
@@ -55,7 +55,6 @@ class RobotDef:
         self.use_Ia = [p[8] for p in params]
         self.use_friction = [p[9] for p in params]
         self.springs = springs
-        self.tendon_couplings = tendon_couplings
         self.dh_convention = dh_convention
         if self.dh_convention in ['sdh', 'std']:
             self._dh_transmat = _standard_dh_transfmat
@@ -76,11 +75,13 @@ class RobotDef:
 
     def _gen_coordinates(self):
         self.coordinates = []
+        self.coordinates_joint_type = []
         # self.joint_coordinate = list(range(self.frame_num))
         for num in self.link_nums:
             for s in self.dh_T[num].free_symbols:
                 if s not in self.coordinates:
                     self.coordinates += [s]
+                    self.coordinates_joint_type += [self.joint_type[num]]
         self.dof = len(self.coordinates)
         vprint(self.coordinates)
 
@@ -120,7 +121,6 @@ class RobotDef:
                 q = self.dh_theta[i]
             else:
                 continue
-
             qt = q.subs(self.subs_q2qt)
             dqt = sympy.diff(qt, sympy.Symbol('t'))
             dq = dqt.subs(self.subs_dqt2dq)
@@ -146,6 +146,7 @@ class RobotDef:
                 self.joint_type.append("R")  # Revolute
             else:
                 self.joint_type.append("A")  # Assitive
+        # print(self.joint_type)
         #print(self.dh_T)
 
     def _gen_params(self):

@@ -45,13 +45,16 @@ class TrajPlotter:
         self._coordinates = coordinates
         #print(self._frame_traj)
 
-    def plot_desired_traj(self, fourier_x):
+    def plot_desired_traj(self, fourier_x, position_only=False):
         x = self._fourier_traj.t
 
         q, dq, ddq = self._fourier_traj.fourier_base_x2q(fourier_x)
 
         fig = plt.figure(1)
+
         plt_q = fig.add_subplot(311)
+
+        plt_q.margins(x=0.002, y=0.02)
         #plt_q.set_title("Optimal Excitation Trajectory")
 
         # position
@@ -62,22 +65,31 @@ class TrajPlotter:
                 co_num = self._coordinates[d].name[1:]
             plt_q.plot(x, q[:, d], label=(r"$q_" + co_num +"$"), linestyle=linestyle)
         #plt_q.legend()
-        plt_q.legend(bbox_to_anchor=(0., 1.12, 1., .102), loc='upper center', ncol=self._fourier_traj.dof,
+        plt_q.legend(bbox_to_anchor=(0., 1.22, 1., .102), loc='upper center', ncol=self._fourier_traj.dof,
                      mode="expand", borderaxespad=0.)
 
+        plt_q.set_xlabel(r'$t$ (s)')
         plt_q.set_ylabel(r'$q$ (rad or m)')
+
+        # if position_only:
+        #     plt_q.set_xlabel(r'$t$ (s)')
+        #     plt.show()
+        #     return
 
         # velocity
         plt_dq = fig.add_subplot(312)
+        plt_dq.margins(x=0.002, y=0.02)
         for d in range(self._fourier_traj.dof):
             _, linestyle = linestyles[d]
             plt_dq.plot(x, dq[:, d], label=(r"$\dot{q}_"+str(d+1)+"$"), linestyle=linestyle)
 
         # plt_dq.legend()
+        plt_dq.set_xlabel(r'$t$ (s)')
         plt_dq.set_ylabel(r'$\dot{q}$ (rad/s or m/s)')
 
         # acceleration
         plt_ddq = fig.add_subplot(313)
+        plt_ddq.margins(x=0.002, y=0.02)
         for d in range(self._fourier_traj.dof):
             #print('traj:', d)
             _, linestyle = linestyles[d]

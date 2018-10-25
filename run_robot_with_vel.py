@@ -15,38 +15,37 @@ import matplotlib.pyplot as plt
 
 
 # Fist, several things we have to define before running it
-# modelname = 'test_psm_long'
 #modelname = 'mtm_2spring_tendon'
-# modelname = 'mtm_3links_parallel'
-# modelname = 'mtm_4links_parallel'
+model_name = 'mtm'
 
 #modelname = 'psm_simple'
-model_name = 'psm_simple_coupled'
+#model_name = 'psm_simple_coupled'
 # testname = 'one'
 
 #testname = 'one'
 
-robotname = 'PSM1'
-#robotname = 'MTMR'
+#robotname = 'PSM1'
+robotname = 'MTMR'
 
-speedscale = 0.95
 
-#coupling = np.array([])
-coupling = np.array([[1.0186, 0, 0], [-.8306, .6089, .6089], [0, -1.2177, 1.2177]])
+motor2dvrk_psm = np.array([[1.0186, 0, 0], [-.8306, .6089, .6089], [0, -1.2177, 1.2177]])
+motor2dvrk_mtm = np.array([[1.0, 0, 0], [-1.0, 1.0, 0], [0.6697, -0.6697, 1.0]])
 #scales = np.array([0.8, 0.8, 0.8, 1, 1, 1, 1])
 #scales = np.array([0.8, 0.8, 0.8, 1, 1, 1])
 
-scales = np.array([1, 0.95, 1, 0.9, 0.8, 0.8, 0.9])
-
-#scales = np.array([0.9, 0.9, 1, 0.9, 0.45, 0.45, 0.5])
+#PSM
+#scales = np.array([1, 0.95, 1, 0.9, 0.8, 0.8, 0.9])
+#MTM
+scales = np.array([0.75, 0.85, 0.85, 0.85, 1, 1, 1])
 
 # wait for a short period of time before recording data
 stable_time = 5
 sampling_time = 30
 sampling_rate = 500
+speedscale = 1
 
 
-trajectory_name = 'four'
+trajectory_name = 'one'
 testname = trajectory_name
 
 model_folder = 'data/' + model_name + '/model/'
@@ -81,25 +80,25 @@ print("data shape: {}".format(a.shape))
 
 print(dof)
 
-#shit
+b = copy.deepcopy(a)
+
+
 is_psm = robotname[0:3] == 'PSM'
 if is_psm:
 	p = dvrk.psm(robotname)
-elif robotname[0:3] == 'MTM':
-	p = dvrk.mtm(robotname)
-
-# deal with the parallelogram, where q3 = q8 - q2
-if not is_psm:
-	if dof == 7 or dof == 3 or dof == 4:
-		a[:, 2] = a[:, 2] - a[:, 1]
-
-#psm coupling
-b = copy.deepcopy(a)
-if coupling.shape[0]>0:
 	for i in range(a.shape[0]):
 		b[i, 4] = 1.0186 * a[i, 4]
 		b[i, 5] = -0.8306 * a[i, 4] + 0.6089 * a[i, 5] + 0.6089 * a[i, 6]
 		b[i, 6] = -1.2177 * a[i, 5] +1.2177 * a[i, 6]
+
+elif robotname[0:3] == 'MTM':
+	p = dvrk.mtm(robotname)
+	for i in range(a.shape[0]):
+		b[i, 2] = -a[i, 1] + a[i, 2]
+		b[i, 3] = 0.6697 * a[i, 1] - 0.6697 * a[i, 2] + a[i, 3]
+
+
+
 a = b * scales
 
 
@@ -170,9 +169,6 @@ while i < len(a) and not rospy.is_shutdown():
 			states[state_cnt][0:dof] = p.get_current_joint_position()[0:dof]
 			states[state_cnt][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
 
-			if dof == 7 or dof == 3 or dof == 4:
-				states[state_cnt][2] = states[state_cnt][1] + states[state_cnt][2]
-				states[state_cnt][dof + 2] = states[state_cnt][dof + 1] + states[state_cnt][dof + 2]
 			states[state_cnt][dof*2:dof * 3] = p.get_current_joint_effort()[0:dof]
 
 
@@ -181,11 +177,17 @@ while i < len(a) and not rospy.is_shutdown():
 
 #Coupling revert
 motor_state = copy.deepcopy(states)
-if coupling.shape[0]>0:
+if is_psm:
 	for i in range(states.shape[0]):
-		motor_state[i, 4:7] = np.matmul(np.linalg.inv(coupling), states[i, 4:7])
-		motor_state[i, 11:14] = np.matmul(np.linalg.inv(coupling), states[i, 11:14])
-		motor_state[i, 18:22] = np.matmul(coupling.transpose(), states[i, 18:22])
+		motor_state[i, 4:7] = np.matmul(np.linalg.inv(motor2dvrk_psm), states[i, 4:7])
+		motor_state[i, 11:14] = np.matmul(np.linalg.inv(motor2dvrk_psm), states[i, 11:14])
+		motor_state[i, 18:22] = np.matmul(motor2dvrk_psm.transpose(), states[i, 18:22])
+	states = motor_state
+else:
+	for i in range(states.shape[0]):
+		motor_state[i, 1:4] = np.matmul(np.linalg.inv(motor2dvrk_mtm), states[i, 1:4])
+		motor_state[i, 8:11] = np.matmul(np.linalg.inv(motor2dvrk_mtm), states[i, 8:11])
+		motor_state[i, 15:18] = np.matmul(motor2dvrk_mtm.transpose(), states[i, 15:18])
 	states = motor_state
 	
 # Save data

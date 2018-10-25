@@ -16,6 +16,7 @@ def load_trajectory_data(file, freq):
     sample_num = row
     dof = col/3
 
+
     print(type(f), f.shape)
 
     t = np.array(range(sample_num), dtype=float) / freq
@@ -181,26 +182,35 @@ def diff_and_filt_data(dof, h, t, q_raw, dq_raw, tau_raw, fc_q, fc_tau, fc_dq, f
     dq = np.zeros_like(dq_raw)
     ddq = np.zeros_like(dq_raw)
     tau = np.zeros_like(tau_raw)
-    wc_q = fc_q * 2 * math.pi * h
-    wc_dq = fc_dq * 2 * math.pi * h
-    wc_ddq = fc_ddq * 2 * math.pi * h
-    wc_tau = fc_tau * 2 * math.pi * h
 
+    if fc_q.shape[0] == 1:
+        wc_q = [fc_q[0] * 2 * math.pi * h]*dof
+        wc_dq = [fc_dq[0] * 2 * math.pi * h]*dof
+        wc_ddq = [fc_ddq[0] * 2 * math.pi * h]*dof
+        wc_tau = [fc_tau[0] * 2 * math.pi * h]*dof
+
+
+    else:
+        wc_q = fc_q * 2 * math.pi * h
+        wc_dq = fc_dq * 2 * math.pi * h
+        wc_ddq = fc_ddq * 2 * math.pi * h
+        wc_tau = fc_tau * 2 * math.pi * h
+
+    print(wc_q)
     print('q_raw shape: {}'.format(q_raw.shape))
     for i in range(dof):
-        print(i)
-        q[:, i] = butter_filtfilt(filter_order, wc_q, q_raw[:, i])
+        q[:, i] = butter_filtfilt(filter_order, wc_q[i], q_raw[:, i])
 
         # joint_i_dq_raw = central_diff(q_raw[:, i], h, 2)
         # dq[:, i] = butter_filtfilt(filter_order, wc_dq, joint_i_dq_raw)
-        dq[:, i] = butter_filtfilt(filter_order, wc_dq, dq_raw[:, i])
+        dq[:, i] = butter_filtfilt(filter_order, wc_dq[i], dq_raw[:, i])
 
         # joint_i_ddq_raw = central_diff(joint_i_dq_raw, h, 2)
         joint_i_ddq_raw = central_diff(dq_raw[:, i], h, 2)
-        ddq[:, i] = butter_filtfilt(filter_order, wc_ddq, joint_i_ddq_raw)
+        ddq[:, i] = butter_filtfilt(filter_order, wc_ddq[i], joint_i_ddq_raw)
         # ddq[:,i] = central_diff( central_diff(q[:,i],h,2) ,h,2)
 
-        tau[:, i] = butter_filtfilt(filter_order, wc_tau, tau_raw[:, i])
+        tau[:, i] = butter_filtfilt(filter_order, wc_tau[i], tau_raw[:, i])
         # tau[:,i] = butter_lfilter( 3, wc_tau, tau_raw[:,i] )
 
     cut_num = 200
@@ -344,8 +354,9 @@ def plot_trajectory_data(t, q_raw, q_f, dq_f, ddq_f, tau_raw, tau_f):
     plt.show()
 
 
-def plot_meas_pred_tau(t, tau_m, tau_p):
+def plot_meas_pred_tau(t, tau_m, tau_p, joint_type, coordinates):
     sample_num, dof = tau_m.shape
+    t = t - t[0]
 
     fig = plt.figure()
 
@@ -359,10 +370,13 @@ def plot_meas_pred_tau(t, tau_m, tau_p):
         plt_tau.plot(t, zeros, color='0.5', linewidth=0.75)
         if i == dof-1:
             plt_tau.set_xlabel(r'$t$ (s)')
-        plt_tau.set_ylabel(r'$\tau$ (Nm) or $f$ (N)')
+        if joint_type[i] == 'R':
+            plt_tau.set_ylabel(r'$\tau_{}$ (Nm)'.format(coordinates[i].name[1:]))
+        else:
+            plt_tau.set_ylabel(r'$f_{}$ (N)'.format(coordinates[i].name[1:]))
         # plt_tau.legend(['Measured', "Predicted"])
         if i == 0:
-            plt_tau.legend(bbox_to_anchor=(0., 1.52, 1., .102), loc='upper center', ncol=3,
+            plt_tau.legend(bbox_to_anchor=(0.0, 1.52, 1.0, .102), loc='upper center', ncol=3,
                            mode="expand", borderaxespad=0.)
 
     plt.tight_layout()
