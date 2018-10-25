@@ -69,7 +69,7 @@ class Dynamics:
             tau.append(sympy.expand(dk_ddq_dt - dL_dq))
 
         print("Adding frictions and springs...")
-        tau_csf = copy.deepcopy(tau)
+        tau = copy.deepcopy(tau)
 
         for i in range(self.rbt_def.frame_num):
             dq = self.rbt_def.dq_for_frame[i]
@@ -78,36 +78,35 @@ class Dynamics:
                 tau_f = sympy.sign(dq) * self.rbt_def.Fc[i] + dq * self.rbt_def.Fv[i] + self.rbt_def.Fo[i]
                 for a in range(len(self.rbt_def.d_coordinates)):
                     dq_da = sympy.diff(dq, self.rbt_def.d_coordinates[a])
-                    tau_csf[a] += dq_da * tau_f
+                    tau[a] += dq_da * tau_f
 
         for k in range(len(self.rbt_def.K)):
             tau_k = self.rbt_def.springs[k] * self.rbt_def.K[k]
             index = self.rbt_def.coordinates.index(list(self.rbt_def.springs[k].free_symbols)[0])
-            tau_csf[index] += -tau_k
+            tau[index] += -tau_k
 
-        print("Add tendon coupling torque and motor inertia...")
-        tau_c = copy.deepcopy(tau_csf)
+        print("Add motor inertia...")
 
         for i in range(self.rbt_def.frame_num):
             if self.rbt_def.use_Ia[i]:
                 tau_Ia = self.rbt_def.ddq_for_frame[i] * self.rbt_def.Ia[i]
                 tau_index = self.rbt_def.dd_coordinates.index(self.rbt_def.ddq_for_frame[i].free_symbols.pop())
-                tau_c[tau_index] += tau_Ia
+                tau[tau_index] += tau_Ia
 
-        for tendon_coupling in self.rbt_def.tendon_couplings:
-            src_frame, dst_frame, k = tendon_coupling
-            dq_src = self.rbt_def.dq_for_frame[src_frame]
-            dq_dst = self.rbt_def.dq_for_frame[dst_frame]
-            src_index = self.rbt_def.d_coordinates.index(dq_src)
+        # for tendon_coupling in self.rbt_def.tendon_couplings:
+        #     src_frame, dst_frame, k = tendon_coupling
+        #     dq_src = self.rbt_def.dq_for_frame[src_frame]
+        #     dq_dst = self.rbt_def.dq_for_frame[dst_frame]
+        #     src_index = self.rbt_def.d_coordinates.index(dq_src)
+        #
+        #     for a in range(len(self.rbt_def.d_coordinates)):
+        #         dq_da = sympy.diff(dq_dst, self.rbt_def.d_coordinates[a])
+        #         tau_c[a] += dq_da * k * tau_csf[src_index]
 
-            for a in range(len(self.rbt_def.d_coordinates)):
-                dq_da = sympy.diff(dq_dst, self.rbt_def.d_coordinates[a])
-                tau_c[a] += dq_da * k * tau_csf[src_index]
-
-        self.tau = tau_c
+        self.tau = tau
 
     def _calc_regressor(self):
-        print("Calculating gregressor...")
+        print("Calculating regressor...")
         A, b = sympy.linear_eq_to_matrix(self.tau, self.rbt_def.bary_params)
 
         self.H = A
