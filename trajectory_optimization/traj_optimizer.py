@@ -90,7 +90,7 @@ class TrajOptimizer:
 
         f = np.linalg.cond(self.H)
 
-        if self._obj_cnt % (self._joint_coef_num*self.dof) == 0:
+        if self._obj_cnt % (self._joint_coef_num*self._dyn.dof) == 0:
             print("Condition number: {}".format(f))
         self._obj_cnt += 1
         # y = self.H
