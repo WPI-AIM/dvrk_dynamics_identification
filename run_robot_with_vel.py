@@ -36,7 +36,7 @@ motor2dvrk_mtm = np.array([[1.0, 0, 0], [-1.0, 1.0, 0], [0.6697, -0.6697, 1.0]])
 #PSM
 #scales = np.array([1, 0.95, 1, 0.9, 0.8, 0.8, 0.9])
 #MTM
-scales = np.array([0.75, 0.85, 0.85, 0.85, 1, 1, 1])
+scales = np.array([0.7, 0.85, 0.85, 0.85, 1, 1, 1])
 
 # wait for a short period of time before recording data
 stable_time = 5
@@ -45,7 +45,7 @@ sampling_rate = 500
 speedscale = 1
 
 
-trajectory_name = 'one'
+trajectory_name = 'three'
 testname = trajectory_name
 
 model_folder = 'data/' + model_name + '/model/'
