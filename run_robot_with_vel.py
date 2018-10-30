@@ -55,16 +55,16 @@ print (dof)
 
 
 if scales.shape[0] != dof:
-	raise Excitation()
+	raise Exception()
 
 # Scale it first 
 param_num_for_one_joint = 1+2*fourier_order
 for i in range(dof):
-	traj_optimizer_result[1+i*param_num_for_one_joint: 7+i*param_num_for_one_joint] * scales[i]
+	traj_optimizer_result[1+i*param_num_for_one_joint: 7+i*param_num_for_one_joint] *= scales[i]
 
 # Generate trajectory data with ramp-up
 x = FourierTraj(dof, fourier_order, base_freq,
-	frequency=sampling_rate, stable_time=stable_time, final_time=sampling_time)
+				frequency=sampling_rate, stable_time=stable_time, final_time=sampling_time)
 q, _, _ = x.fourier_base_x2q(traj_optimizer_result)
 # plt.plot(q[:,0])
 # plt.show()
