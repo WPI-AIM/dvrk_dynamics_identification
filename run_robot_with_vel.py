@@ -34,7 +34,7 @@ motor2dvrk_mtm = np.array([[1.0, 0, 0], [-1.0, 1.0, 0], [0.6697, -0.6697, 1.0]])
 #scales = np.array([0.8, 0.8, 0.8, 1, 1, 1])
 
 #PSM
-scales = np.array([0.95, 0.95, 1, 1, 1, 1, 1])
+scales = np.array([0.85, 0.85, 0.9, 1, 1, 1, 1])
 #scales = np.array([0.5, 0.5, 0.5, 0.75, 0.75, 0.75, 0.75])
 #MTM
 #scales = np.array([0.7, 0.85, 0.85, 0.85, 1, 1, 1])
@@ -46,7 +46,7 @@ sampling_rate = 500
 speedscale = 1
 
 
-trajectory_name = 'two'
+trajectory_name = 'three'
 testname = trajectory_name
 
 model_folder = 'data/' + model_name + '/model/'
