@@ -16,17 +16,13 @@ import matplotlib.pyplot as plt
 
 # Fist, several things we have to define before running it
 #modelname = 'mtm_2spring_tendon'
+
 model_name = 'mtm'
 #model_name = 'psm_simplified'
 
-#modelname = 'psm_simple'
-#model_name = 'psm_simple_coupled'
-# testname = 'one'
 
-#testname = 'one'
-#robotname = 'PSM1'
-robotname = 'MTMR'
-
+robotname = 'PSM1'
+#robotname = 'MTMR'
 
 motor2dvrk_psm = np.array([[1.0186, 0, 0], [-.8306, .6089, .6089], [0, -1.2177, 1.2177]])
 motor2dvrk_mtm = np.array([[1.0, 0, 0], [-1.0, 1.0, 0], [0.6697, -0.6697, 1.0]])
@@ -34,9 +30,12 @@ motor2dvrk_mtm = np.array([[1.0, 0, 0], [-1.0, 1.0, 0], [0.6697, -0.6697, 1.0]])
 #scales = np.array([0.8, 0.8, 0.8, 1, 1, 1])
 
 #PSM
-#scales = np.array([0.8, 0.8, 0.8, 0.9, 0.9, 0.9, 0.9])
+
+scales = np.array([1, 1, 1, 1, 1, 1, 1])
+#scales = np.array([0.5, 0.5, 0.5, 0.75, 0.75, 0.75, 0.75])
+
 #MTM
-scales = np.array([0.7, 0.85, 0.85, 0.85, 1, 1, 1])
+#scales = np.array([0.7, 0.85, 0.85, 0.85, 1, 1, 1])
 
 # wait for a short period of time before recording data
 stable_time = 5
