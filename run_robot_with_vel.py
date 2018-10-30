@@ -17,13 +17,13 @@ import matplotlib.pyplot as plt
 # Fist, several things we have to define before running it
 #modelname = 'mtm_2spring_tendon'
 model_name = 'mtm'
+#model_name = 'psm_simplified'
 
 #modelname = 'psm_simple'
 #model_name = 'psm_simple_coupled'
 # testname = 'one'
 
 #testname = 'one'
-
 #robotname = 'PSM1'
 robotname = 'MTMR'
 
@@ -34,18 +34,18 @@ motor2dvrk_mtm = np.array([[1.0, 0, 0], [-1.0, 1.0, 0], [0.6697, -0.6697, 1.0]])
 #scales = np.array([0.8, 0.8, 0.8, 1, 1, 1])
 
 #PSM
-#scales = np.array([1, 0.95, 1, 0.9, 0.8, 0.8, 0.9])
+#scales = np.array([0.8, 0.8, 0.8, 0.9, 0.9, 0.9, 0.9])
 #MTM
 scales = np.array([0.7, 0.85, 0.85, 0.85, 1, 1, 1])
 
 # wait for a short period of time before recording data
 stable_time = 5
 sampling_time = 30
-sampling_rate = 500
+sampling_rate = 200
 speedscale = 1
 
 
-trajectory_name = 'three'
+trajectory_name = 'one'
 testname = trajectory_name
 
 model_folder = 'data/' + model_name + '/model/'
@@ -131,7 +131,7 @@ r = rospy.Rate(sampling_rate * speedscale)
 i = 0
 state_cnt = 0
 while i < len(a) and not rospy.is_shutdown():
-	if is_psm and dof ==7:
+	if is_psm:
 		#print(a[i,-1])
 		p.move_joint_some(a[i, 0:dof-1], jonits_array, interpolate=False,blocking=False)
 		p.move_jaw(a[i, -1],interpolate=False,blocking=False)
@@ -159,17 +159,18 @@ while i < len(a) and not rospy.is_shutdown():
 		#print('it works')
 
 	else:
-		p.move_joint_some(a[i, :], jonits_array, False)
+		p.move_joint_some(a[i, :], jonits_array, interpolate=False,blocking=False)
 
 		# states[i][0:dof] = p.get_current_joint_position()[0:dof]
 		# states[i][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
 		# states[i][dof*2:dof*3] = p.get_current_joint_effort()[0:dof]
-		if i >= start_cnt:
-			state_cnt = i - start_cnt
-			states[state_cnt][0:dof] = p.get_current_joint_position()[0:dof]
-			states[state_cnt][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
 
-			states[state_cnt][dof*2:dof * 3] = p.get_current_joint_effort()[0:dof]
+		# if i >= start_cnt:
+		# 	state_cnt = i - start_cnt
+		# 	states[state_cnt][0:dof] = p.get_current_joint_position()[0:dof]
+		# 	states[state_cnt][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
+
+		# 	states[state_cnt][dof*2:dof * 3] = p.get_current_joint_effort()[0:dof]
 
 
 	r.sleep()
