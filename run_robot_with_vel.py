@@ -46,7 +46,7 @@ sampling_rate = 500
 speedscale = 1
 
 
-trajectory_name = 'three'
+trajectory_name = 'two'
 testname = trajectory_name
 
 model_folder = 'data/' + model_name + '/model/'
