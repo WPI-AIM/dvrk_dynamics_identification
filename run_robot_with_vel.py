@@ -42,11 +42,11 @@ scales = np.array([1, 1, 1, 1, 1, 1, 1])
 # wait for a short period of time before recording data
 stable_time = 5
 sampling_time = 30
-sampling_rate = 500
+sampling_rate = 200
 speedscale = 1
 
 
-trajectory_name = 'one'
+trajectory_name = 'three'
 testname = trajectory_name
 
 model_folder = 'data/' + model_name + '/model/'
