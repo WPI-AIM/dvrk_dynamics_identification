@@ -19,7 +19,7 @@ model_name = 'mtm'
 
 
 # robotname = 'PSM1'
-robotname = 'MTMR'
+robot_name = 'MTMR'
 
 test_name = 'one'
 
@@ -28,16 +28,15 @@ motor2dvrk_mtm = np.array([[1.0, 0, 0], [-1.0, 1.0, 0], [0.6697, -0.6697, 1.0]])
 
 
 # wait for a short period of time before recording data
-stable_time = 5
-sampling_time = 30
 sampling_rate = 200
-speed = 0.2
+speed = 0.4
 
 model_folder = 'data/' + model_name + '/model/'
 robot_model = load_data(model_folder, model_name)
 
 trajectory_folder = 'data/' + model_name + '/optimal_trajectory/'
 
+p = dvrk.mtm(robot_name)
 p.home()
 
 rospy.sleep(3)
@@ -45,13 +44,13 @@ rospy.sleep(3)
 jonits_array = np.array([d for d in range(7)])
 
 
-q_start = -0.5
-q_end = 0.5
+q_start = np.deg2rad(-85)
+q_end = np.deg2rad(195)
 
 q_trajectory = np.linspace(q_start, q_end, num=int(sampling_rate * (q_end - q_start) / speed))
 states = np.zeros((q_trajectory.shape[0]*2, 3))
 
-q = np.array([0, 0, 0, q_start, 0, 0, 0])
+q = np.array([0., np.deg2rad(2.5), np.deg2rad(2.5), q_start, 0., 0., 0.])
 p.move_joint_some(q, jonits_array)
 
 joint_num = 3
@@ -62,7 +61,7 @@ r = rospy.Rate(sampling_rate)
 
 if not rospy.is_shutdown():
     for i in range(q_trajectory.shape[0]):
-        p.move_joint_some([q_trajectory[i]], [3], interpolate=False, blocking=False)
+        p.move_joint_some(np.array([q_trajectory[i]]), np.array([joint_num]), interpolate=False, blocking=False)
 
         states[state_cnt][0] = p.get_current_joint_position()[joint_num]
         states[state_cnt][1] = p.get_current_joint_velocity()[joint_num]
@@ -72,7 +71,7 @@ if not rospy.is_shutdown():
         r.sleep()
 
     for i in range(q_trajectory.shape[0]):
-        p.move_joint_some([q_trajectory[q_trajectory.shape[0] - i]], [3], interpolate=False, blocking=False)
+        p.move_joint_some(np.array([q_trajectory[q_trajectory.shape[0] - i - 1]]), np.array([joint_num]), interpolate=False, blocking=False)
 
         states[state_cnt][0] = p.get_current_joint_position()[joint_num]
         states[state_cnt][1] = p.get_current_joint_velocity()[joint_num]
