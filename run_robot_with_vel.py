@@ -41,7 +41,7 @@ sampling_rate = 200
 speedscale = 1
 
 
-trajectory_name = 'three'
+trajectory_name = 'one'
 testname = trajectory_name
 
 model_folder = 'data/' + model_name + '/model/'
@@ -161,12 +161,12 @@ while i < len(a) and not rospy.is_shutdown():
 		# states[i][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
 		# states[i][dof*2:dof*3] = p.get_current_joint_effort()[0:dof]
 
-		# if i >= start_cnt:
-		# 	state_cnt = i - start_cnt
-		# 	states[state_cnt][0:dof] = p.get_current_joint_position()[0:dof]
-		# 	states[state_cnt][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
+		if i >= start_cnt:
+			state_cnt = i - start_cnt
+			states[state_cnt][0:dof] = p.get_current_joint_position()[0:dof]
+		 	states[state_cnt][dof:dof*2] = p.get_current_joint_velocity()[0:dof]
 
-		# 	states[state_cnt][dof*2:dof * 3] = p.get_current_joint_effort()[0:dof]
+		 	states[state_cnt][dof*2:dof * 3] = p.get_current_joint_effort()[0:dof]
 
 
 	r.sleep()
