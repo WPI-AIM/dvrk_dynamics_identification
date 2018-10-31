@@ -175,7 +175,7 @@ def butter_filtfilt(N, Wn, signal):
 #     return t, q, tau, reft, trajref
 #
 #
-def diff_and_filt_data(dof, h, t, q_raw, dq_raw, tau_raw, fc_q, fc_tau, fc_dq, fc_ddq, filter_order=6):
+def diff_and_filt_data(dof, h, t, q_raw, dq_raw, tau_raw, fc_q, fc_tau, fc_dq, fc_ddq, cut_num = 200, filter_order=6):
     s = q_raw[0].shape[0]
 
     q = np.zeros_like(q_raw)
@@ -196,7 +196,6 @@ def diff_and_filt_data(dof, h, t, q_raw, dq_raw, tau_raw, fc_q, fc_tau, fc_dq, f
         wc_ddq = fc_ddq * 2 * math.pi * h
         wc_tau = fc_tau * 2 * math.pi * h
 
-    print(wc_q)
     print('q_raw shape: {}'.format(q_raw.shape))
     for i in range(dof):
         q[:, i] = butter_filtfilt(filter_order, wc_q[i], q_raw[:, i])
@@ -212,8 +211,6 @@ def diff_and_filt_data(dof, h, t, q_raw, dq_raw, tau_raw, fc_q, fc_tau, fc_dq, f
 
         tau[:, i] = butter_filtfilt(filter_order, wc_tau[i], tau_raw[:, i])
         # tau[:,i] = butter_lfilter( 3, wc_tau, tau_raw[:,i] )
-
-    cut_num = 200
 
     return t[cut_num:-cut_num],\
            q[cut_num:-cut_num, :], dq[cut_num:-cut_num, :], ddq[cut_num:-cut_num, :], tau[cut_num:-cut_num, :],\
