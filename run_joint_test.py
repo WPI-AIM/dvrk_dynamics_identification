@@ -81,7 +81,7 @@ if not rospy.is_shutdown():
         r.sleep()
 
 
-
+print(state_cnt)
 
 # Save data
 data_file_dir = './data/' + model_name + '/joint_test/' + test_name + '_results.csv'
