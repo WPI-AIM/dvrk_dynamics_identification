@@ -6,7 +6,7 @@ to solve the dynamics model identification of it. This software framework was de
 ## Procedure
 
 <p align="center">
-  <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/flow/workflow.png" width="540" title="hover text">
+  <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/workflow.png" width="540" title="hover text">
 
 </p>
 
@@ -38,6 +38,8 @@ to solve the dynamics model identification of it. This software framework was de
 * Python 2.7
 * Python modules
     * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt, cloudpickle
+
+Anaconda is recommended.
 
 ## Application and example
 * [Master Tool Manipulator (MTM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/master/main_mtm.ipynb)
