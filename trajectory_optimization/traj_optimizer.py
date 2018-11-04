@@ -62,6 +62,8 @@ class TrajOptimizer:
 
         print('frames_constrained: {}'.format(self.const_frame_ind))
 
+        self._obj_cnt = 0
+
     def _prepare_opt(self):
         sample_num = self._order * self._sample_point + 1
         self.sample_num = sample_num
@@ -71,6 +73,7 @@ class TrajOptimizer:
 
         self.H = np.zeros((self._dyn.dof * sample_num, self._dyn.base_num))
         self.H_norm = np.zeros((self._dyn.dof * sample_num, self._dyn.base_num))
+
     def _obj_func(self, x):
         # objective
         q, dq, ddq = self.fourier_traj.fourier_base_x2q(x)
@@ -86,7 +89,10 @@ class TrajOptimizer:
         self.H /= np.subtract(self.H.max(axis=0), self.H.min(axis=0))
 
         f = np.linalg.cond(self.H)
-        print("cond: {}".format(f))
+
+        if self._obj_cnt % (self._joint_coef_num*self._dyn.dof) == 0:
+            print("Condition number: {}".format(f))
+        self._obj_cnt += 1
         # y = self.H
         # xmax, xmin = y.max(), y.min()
         # y = (y - xmin) / (xmax - xmin)
@@ -171,24 +177,24 @@ class TrajOptimizer:
         self._opt_prob.addObj('f')
 
     def _add_vars2prob(self):
-        joint_coef_num = 2*self._order + 1
+        self._joint_coef_num = 2*self._order + 1
 
         def rand_local(l, u, scale):
             return (np.random.random() * (u - l)/2 + (u + l)/2) * scale
 
         for num in range(self._dyn.dof):
             # q0
-            self._opt_prob.addVar('x'+str(num*joint_coef_num + 1), 'c',
+            self._opt_prob.addVar('x'+str(num*self._joint_coef_num + 1), 'c',
                                   lower=self._q0_min, upper=self._q0_max,
                                   value=rand_local(self._q0_min, self._q0_max, 0.1))
             # a sin
             for o in range(self._order):
-                self._opt_prob.addVar('x' + str(num * joint_coef_num + 1 + o + 1), 'c',
+                self._opt_prob.addVar('x' + str(num * self._joint_coef_num + 1 + o + 1), 'c',
                                       lower=self._ab_min, upper=self._ab_max,
                                       value=rand_local(self._ab_min, self._ab_max, 0.1))
             # b cos
             for o in range(self._order):
-                self._opt_prob.addVar('x' + str(num * joint_coef_num + 1 + self._order + o + 1), 'c',
+                self._opt_prob.addVar('x' + str(num * self._joint_coef_num + 1 + self._order + o + 1), 'c',
                                       lower=self._ab_min, upper=self._ab_max,
                                       value=rand_local(self._ab_min, self._ab_max, 0.1))
 
@@ -241,7 +247,7 @@ class TrajOptimizer:
         print('x: {}'.format(xstr))
         #print('inform: ', inform)
 
-        print self._opt_prob.solution(0)
+        # print self._opt_prob.solution(0)
 
     def calc_normalize_mat(self):
         q, dq, ddq = self.fourier_traj.fourier_base_x2q(self.x_result)

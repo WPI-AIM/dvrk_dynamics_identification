@@ -1,6 +1,6 @@
-# A dynamic model identification framework developed for daVinci Suigical System
+# A dynamic model identification package for the da Vinci Research Kit (under development)
 
-There are parallelograms, springs and counter weights in daVinci surgical system so that we can not use existing tools
+There are parallelograms, springs, tendon couplings, cables, and counterweight in da Vinci surgical system so that we can not use existing tools
 to solve the dynamics model identification of it. This software framework was developed to solve these problems.
 
 ## Procedure
@@ -23,28 +23,16 @@ to solve the dynamics model identification of it. This software framework was de
     * Zero-phase low-pass filter for original data
     * Remove the data whose velocity is close to zero to decrease the noise for Coulomb friction
 * Identification
+    * Joint cable torque identification
     * Ordinary Least Square (OLS)
-    * ~~Weighted Least Square (WLS)~~
+    * Weighted Least Square (WLS)
     * Semi-definite Programming (SDP)
 * Excitation of robots, using dvrk ROS library
 ### Yet to be done
 * Output of the identified paramters
 * Output of C++ or Python code of identified dynamic model for control use 
 
-### Another to-do list
-* ~~Add friction parameters into dynamic model~~
-* ~~Add Cartisian constraints in optimal excitation trajectory generation~~
-* ~~Add constraints of mass, center of mass and friction in SDP~~
-* ~~Save and load parameters for each step to avoid repetitive work every time~~
 * Regularize output print
-* ~~Add motor inertia~~
-* ~~Add spring parameters into dynamics model~~
-* ~~Optimize the code to make it faster~~
-* ~~Create the model of the MTM~~
-* ~~Create the model of the PSM~~
-* Identification of the dynamic model of the MTM
-* Identification of the dynamic model of the PSM
-
 
 ## Requirements
 * Python 2.7
@@ -52,7 +40,9 @@ to solve the dynamics model identification of it. This software framework was de
     * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt, cloudpickle
 
 ## Application and example
+* [Master Tool Manipulator (MTM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/develop/main_mtm.ipynb)
 
+* [Patient Side Manipulator (PSM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/develop/main_psm.ipynb)
 
 ## Author
 Yan Wang, Radian

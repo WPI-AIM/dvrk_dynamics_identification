@@ -45,13 +45,18 @@ class TrajPlotter:
         self._coordinates = coordinates
         #print(self._frame_traj)
 
-    def plot_desired_traj(self, fourier_x):
+    def plot_desired_traj(self, fourier_x, position_only=False):
+        font_size_def = 9.0
+
         x = self._fourier_traj.t
 
         q, dq, ddq = self._fourier_traj.fourier_base_x2q(fourier_x)
 
         fig = plt.figure(1)
+
         plt_q = fig.add_subplot(311)
+
+        plt_q.margins(x=0.002, y=0.02)
         #plt_q.set_title("Optimal Excitation Trajectory")
 
         # position
@@ -60,32 +65,43 @@ class TrajPlotter:
             co_num = str(d + 1)
             if self._coordinates != []:
                 co_num = self._coordinates[d].name[1:]
-            plt_q.plot(x, q[:, d], label=(r"$q_" + co_num +"$"), linestyle=linestyle)
+            plt_q.plot(x, q[:, d], label=(r"$q^m_" + co_num +"$"), linestyle=linestyle)
         #plt_q.legend()
-        plt_q.legend(bbox_to_anchor=(0., 1.12, 1., .102), loc='upper center', ncol=self._fourier_traj.dof,
-                     mode="expand", borderaxespad=0.)
+        plt_q.legend(bbox_to_anchor=(0., 1.22, 1., .102), loc='upper center', ncol=self._fourier_traj.dof,
+                     mode="expand", borderaxespad=0., fontsize=font_size_def)
 
-        plt_q.set_ylabel(r'$q$ (rad or m)')
+        plt_q.set_xlabel(r'$t$ (s)', fontsize=font_size_def)
+        plt_q.set_ylabel(r'$q^m$ (rad or m)', fontsize=font_size_def)
+        plt_q.tick_params(labelsize=font_size_def)
+        # if position_only:
+        #     plt_q.set_xlabel(r'$t$ (s)')
+        #     plt.show()
+        #     return
 
         # velocity
         plt_dq = fig.add_subplot(312)
+        plt_dq.margins(x=0.002, y=0.02)
         for d in range(self._fourier_traj.dof):
             _, linestyle = linestyles[d]
-            plt_dq.plot(x, dq[:, d], label=(r"$\dot{q}_"+str(d+1)+"$"), linestyle=linestyle)
+            plt_dq.plot(x, dq[:, d], label=(r"$\dot{q}^m_"+str(d+1)+"$"), linestyle=linestyle)
 
         # plt_dq.legend()
-        plt_dq.set_ylabel(r'$\dot{q}$ (rad/s or m/s)')
+        plt_dq.set_xlabel(r'$t$ (s)', fontsize=font_size_def)
+        plt_dq.set_ylabel(r'$\dot{q}^m$ (rad/s or m/s)', fontsize=font_size_def)
+        plt_dq.tick_params(labelsize=font_size_def)
 
         # acceleration
         plt_ddq = fig.add_subplot(313)
+        plt_ddq.margins(x=0.002, y=0.02)
         for d in range(self._fourier_traj.dof):
             #print('traj:', d)
             _, linestyle = linestyles[d]
-            plt_ddq.plot(x, ddq[:, d], label=(r"$\ddot{q}_"+str(d+1)+"$"), linestyle=linestyle)
+            plt_ddq.plot(x, ddq[:, d], label=(r"$\ddot{q}^m_"+str(d+1)+"$"), linestyle=linestyle)
 
         # plt_ddq.legend()
-        plt_ddq.set_xlabel(r'$t$ (s)')
-        plt_ddq.set_ylabel(r'$\ddot{q}$ (rad/s$^2$ or m/s$^2$)')
+        plt_ddq.set_xlabel(r'$t$ (s)', fontsize=font_size_def)
+        plt_ddq.set_ylabel(r'$\ddot{q}^m$ (rad/s$^2$ or m/s$^2$)', fontsize=font_size_def)
+        plt_ddq.tick_params(labelsize=font_size_def)
         #plt.tight_layout()
         plt.show()
 

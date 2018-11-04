@@ -51,7 +51,7 @@ class Geometry:
             vprint('v_cw{}'.format(num))
 
 
-        #TO MAKE FASTER : COMMENT THIS
+        #TO MAKE FASTER and CHECK DH: COMMENT THIS
             v_cw = sympy.diff(self.p_c[num].subs(self.rbt_df.subs_q2qt), t)
             v_cw = v_cw.subs(self.rbt_df.subs_dqt2dq + self.rbt_df.subs_qt2q)
             self.v_cw[num] = sympy.simplify(v_cw)

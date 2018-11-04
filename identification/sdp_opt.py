@@ -7,10 +7,10 @@ from utils import gen_DLki_mat
 
 class SDPOpt:
     def __init__(self, W, tau, rbt_def, value_constraints=[], spring_constraints=[]):
-        self.small_positive_num = 0.00001
+        self.small_positive_num = 0.000001
         self.min_Fc = 0.001
         self.min_Fv = 0.001
-        self.min_Ia = 0.02
+        self.min_Ia = 0.001
 
         self._W = W
         self._tau = tau
@@ -54,17 +54,17 @@ class SDPOpt:
         DLkis = gen_DLki_mat()
 
         i_param = 0
-        i_link = 0
 
         for f in range(self._rbt_def.frame_num)[1:]:
+            if self._rbt_def.joint_type[f] == 'A':
+                continue
+
             if self._rbt_def.use_inertia[f]:
                 # semi-definite
                 D = np.zeros((6, 6))
                 for i in range(10):
                     D += DLkis[i] * self._x[i_param + i]
                 self._constraints.append(D >> np.identity(6) * self.small_positive_num)
-
-            #if len(self._value_constraints) != 0:
 
             # constraint order: (min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z)
             if len(self._value_constraints) != 0:
@@ -109,7 +109,6 @@ class SDPOpt:
 
                 # Inertia of motor
                 if self._rbt_def.use_Ia[f]:
-                    print("Ia{} param{}".format(f, i_param+1))
                     self._constraints.append(self._x[i_param] >= self.min_Ia)
                     i_param += 1
 
@@ -117,17 +116,18 @@ class SDPOpt:
                 if self._rbt_def.use_inertia[f]:
                     i_param += 10
 
-                # Coulomb friction
-                if 'Coulomb' in self._rbt_def.friction_type:
-                    i_param += 1
+                if self._rbt_def.use_friction[f]:
+                    # Coulomb friction
+                    if 'Coulomb' in self._rbt_def.friction_type:
+                        i_param += 1
 
-                # Viscous friction
-                if 'viscous' in self._rbt_def.friction_type:
-                    i_param += 1
+                    # Viscous friction
+                    if 'viscous' in self._rbt_def.friction_type:
+                        i_param += 1
 
-                # Coulomb friction offset
-                if 'offset' in self._rbt_def.friction_type:
-                    i_param += 1
+                    # Coulomb friction offset
+                    if 'offset' in self._rbt_def.friction_type:
+                        i_param += 1
 
                 # Inertia of motor
                 if self._rbt_def.use_Ia[f]:
@@ -147,12 +147,12 @@ class SDPOpt:
         print("Solving problem...")
         self._prob = cp.Problem(self._obj, self._constraints)
 
-        result = self._prob.solve(solver=cp.SCS, verbose=True, max_iters=15000)
+        result = self._prob.solve(solver=cp.SCS, verbose=True, max_iters=5000)
         # result = self._prob.solve(solver=cp.CVXOPT, verbose=True)
 
         self.x_result = self._x.value
-        print(self._x.value)
-        print(result)
+        # print(self._x.value)
+        # print(result)
 
 
 
