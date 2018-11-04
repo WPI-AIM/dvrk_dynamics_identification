@@ -6,7 +6,7 @@ to solve the dynamics model identification of it. This software framework was de
 ## Procedure
 
 <p align="center">
-  <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/flow/procedure.png" width="540" title="hover text">
+  <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/flow/workflow.png" width="540" title="hover text">
 
 </p>
 
@@ -40,9 +40,9 @@ to solve the dynamics model identification of it. This software framework was de
     * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt, cloudpickle
 
 ## Application and example
-* [Master Tool Manipulator (MTM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/develop/main_mtm.ipynb)
+* [Master Tool Manipulator (MTM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/master/main_mtm.ipynb)
 
-* [Patient Side Manipulator (PSM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/develop/main_psm.ipynb)
+* [Patient Side Manipulator (PSM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/master/main_psm.ipynb)
 
 ## Author
 Yan Wang, Radian
