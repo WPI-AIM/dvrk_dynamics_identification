@@ -357,6 +357,8 @@ def plot_meas_pred_tau(t, tau_m, tau_p, joint_type, coordinates):
 
     fig = plt.figure()
 
+    font_size_def = 9.0
+
     for i in range(dof):
         plt_tau = fig.add_subplot(dof, 1, i + 1)
         plt_tau.margins(x=0.002, y=0.02)
@@ -364,19 +366,19 @@ def plot_meas_pred_tau(t, tau_m, tau_p, joint_type, coordinates):
         plt_tau.plot(t, tau_p[:, i], 'b', label="Predicted", linewidth=1)
         plt_tau.plot(t, tau_p[:, i] - tau_m[:, i], 'k--', label="Error", linewidth=1)
         zeros = np.zeros(tau_p[:, i].shape)
-        plt_tau.plot(t, zeros, color='0.5', linewidth=0.75)
+        # plt_tau.plot(t, zeros, color='0.5', linewidth=0.75)
         if i == dof-1:
-            plt_tau.set_xlabel(r'$t$ (s)')
+            plt_tau.set_xlabel(r'$t$ (s)', fontsize=font_size_def)
         if joint_type[i] == 'R':
-            plt_tau.set_ylabel(r'$\tau_{}$ (Nm)'.format(coordinates[i].name[1:]))
+            plt_tau.set_ylabel(r'$\tau^m_{}$ (Nm)'.format(coordinates[i].name[1:]), fontsize=font_size_def)
         else:
-            plt_tau.set_ylabel(r'$f_{}$ (N)'.format(coordinates[i].name[1:]))
+            plt_tau.set_ylabel(r'$f^m_{}$ (N)'.format(coordinates[i].name[1:], fontsize=font_size_def))
         # plt_tau.legend(['Measured', "Predicted"])
         if i == 0:
-            plt_tau.legend(bbox_to_anchor=(0.0, 1.52, 1.0, .102), loc='upper center', ncol=3,
-                           mode="expand", borderaxespad=0.)
-
-    plt.tight_layout()
+            plt_tau.legend(bbox_to_anchor=(0.0, 1.40, 1.0, .102), loc='upper center', ncol=3,
+                           mode="expand", borderaxespad=0., fontsize=font_size_def)
+        plt_tau.tick_params(labelsize=font_size_def)
+    # plt.tight_layout()
     plt.show()
 
 

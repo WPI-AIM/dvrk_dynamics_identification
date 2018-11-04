@@ -7,10 +7,10 @@ from utils import gen_DLki_mat
 
 class SDPOpt:
     def __init__(self, W, tau, rbt_def, value_constraints=[], spring_constraints=[]):
-        self.small_positive_num = 0.00001
+        self.small_positive_num = 0.000001
         self.min_Fc = 0.001
         self.min_Fv = 0.001
-        self.min_Ia = 0.02
+        self.min_Ia = 0.001
 
         self._W = W
         self._tau = tau
@@ -147,7 +147,7 @@ class SDPOpt:
         print("Solving problem...")
         self._prob = cp.Problem(self._obj, self._constraints)
 
-        result = self._prob.solve(solver=cp.SCS, verbose=True, max_iters=20000)
+        result = self._prob.solve(solver=cp.SCS, verbose=True, max_iters=5000)
         # result = self._prob.solve(solver=cp.CVXOPT, verbose=True)
 
         self.x_result = self._x.value
