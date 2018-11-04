@@ -1,6 +1,6 @@
-# A dynamic model identification framework developed for daVinci Suigical System
+# A dynamic model identification package for the da Vinci Research Kit (under development)
 
-There are parallelograms, springs, tendon couplings, and counterweight in da Vinci surgical system so that we can not use existing tools
+There are parallelograms, springs, tendon couplings, cables, and counterweight in da Vinci surgical system so that we can not use existing tools
 to solve the dynamics model identification of it. This software framework was developed to solve these problems.
 
 
@@ -17,6 +17,7 @@ to solve the dynamics model identification of it. This software framework was de
     * Zero-phase low-pass filter for original data
     * Remove the data whose velocity is close to zero to decrease the noise for Coulomb friction
 * Identification
+    * Joint cable torque identification
     * Ordinary Least Square (OLS)
     * Weighted Least Square (WLS)
     * Semi-definite Programming (SDP)
@@ -27,17 +28,15 @@ to solve the dynamics model identification of it. This software framework was de
 
 * Regularize output print
 
-* Identification of the dynamic model of the MTM
-* ~~Identification of the dynamic model of the PSM~~
-
-
 ## Requirements
 * Python 2.7
 * Python modules
     * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt, cloudpickle
 
 ## Application and example
+* [Master Tool Manipulator (MTM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/develop/main_mtm.ipynb)
 
+* [Patient Side Manipulator (PSM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/develop/main_psm.ipynb)
 
 ## Author
 Yan Wang, Radian
