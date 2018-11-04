@@ -1,12 +1,12 @@
 # A dynamic model identification package for the da Vinci Research Kit (under development)
 
-There are parallelograms, springs, tendon couplings, cables, and counterweight in da Vinci surgical system so that we can not use existing tools
-to solve the dynamics model identification of it. This software framework was developed to solve these problems.
+There are parallelograms, springs, tendon couplings, cables, and counterweight in da Vinci Research Kit (dVRK) so that we can not use existing tools
+to solve the dynamics model identification of it. This software framework was developed to solve these problems. However, this package is not limited to the dVRK. It can also be used to idendity the dynamic model of other robots.
 
 ## Procedure
 
 <p align="center">
-  <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/workflow.png" width="500" title="hover text">
+  <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/workflow.png" width="400" title="hover text">
 
 </p>
 
@@ -47,7 +47,7 @@ Anaconda is recommended.
 * [Patient Side Manipulator (PSM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/master/main_psm.ipynb)
 
 ## Author
-Yan Wang, Radian
+Yan Wang, Radian Gondokaryono
 
 ## Reference
 When developing this work, we referred a lot from the following places:
