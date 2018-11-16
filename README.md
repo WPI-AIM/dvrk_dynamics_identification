@@ -6,7 +6,7 @@ to solve the dynamics model identification of it. This software framework was de
 ## Procedure
 
 <p align="center">
-  <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/workflow.png" width="540" title="hover text">
+  <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/workflow.png" width="500" title="hover text">
 
 </p>
 
