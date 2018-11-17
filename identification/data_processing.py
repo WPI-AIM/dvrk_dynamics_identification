@@ -431,11 +431,11 @@ def barycentric2standard_params(x, rbt_def):
             x_out += [x[i]]
             i += 1
 
-        i_link += 1
+        if rbt_def.spring_dl[i_link] != None:
+            x_out += [x[i]]
+            i += 1
 
-    for j in range(rbt_def.spring_num):
-        x_out += [x[i]]
-        i += 1
+        i_link += 1
 
     return x_out
 

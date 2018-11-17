@@ -27,21 +27,9 @@ _modified_dh_transfmat = sympy.Matrix([
 
 _friction_types = ['Coulomb', 'viscous', 'offset']
 
-verbose = False
-
-if verbose:
-    def vprint(*args):
-        # Print each argument separately so caller doesn't need to
-        # stuff everything to be printed into a single string
-        for arg in args:
-           print arg,
-        print
-else:
-    vprint = lambda *a: None      # do-nothing function
-
 
 class RobotDef:
-    def __init__(self, params, springs, dh_convention='mdh', friction_type=['viscous']):
+    def __init__(self, params, dh_convention='mdh', friction_type=['viscous']):
 
         self.frame_num = len(params)
         self.link_nums = [p[0] for p in params]
@@ -54,19 +42,13 @@ class RobotDef:
         self.use_inertia = [p[7] for p in params]
         self.use_Ia = [p[8] for p in params]
         self.use_friction = [p[9] for p in params]
-        self.springs = springs
+        self.spring_dl = [p[10] for p in params]
         self.dh_convention = dh_convention
         if self.dh_convention in ['sdh', 'std']:
             self._dh_transmat = _standard_dh_transfmat
         elif self.dh_convention in ['mdh', 'modified']:
             self._dh_transmat = _modified_dh_transfmat
         self.friction_type = friction_type
-        vprint("frame_number: ", self.frame_num)
-        vprint(self.succ_link_num)
-        #print(sympy.Matrix(self.dh_a + self.dh_alpha + self.dh_d + self.dh_theta))
-        vprint(sympy.Matrix([self.dh_a + self.dh_alpha + self.dh_d + self.dh_theta]).free_symbols)
-        #print(sympy.Matrix(self.dh_a + self.dh_alpha, self.dh_d + self.dh_theta))
-        #for p in dh_params:
 
         self._gen_dh_transfm()
         self._gen_params()
@@ -83,32 +65,21 @@ class RobotDef:
                     self.coordinates += [s]
                     self.coordinates_joint_type += [self.joint_type[num]]
         self.dof = len(self.coordinates)
-        vprint(self.coordinates)
 
         self.d_coordinates = [new_sym('d'+co.name) for co in self.coordinates]
         self.dd_coordinates = [new_sym('dd' + co.name) for co in self.coordinates]
-        vprint(self.d_coordinates)
-        vprint(self.dd_coordinates)
+
 
         self.coordinates_t = [dynamicsymbols(co.name+'t') for co in self.coordinates]
-        vprint(self.coordinates_t)
         self.d_coordinates_t = [sympy.diff(co_t) for co_t in self.coordinates_t]
-        vprint(self.d_coordinates_t)
         self.dd_coordinates_t = [sympy.diff(d_co_t) for d_co_t in self.d_coordinates_t]
-        vprint(self.dd_coordinates_t)
 
         self.subs_q2qt = [(q, qt) for q, qt in zip(self.coordinates, self.coordinates_t)]
-        vprint(self.subs_q2qt)
         self.subs_dq2dqt = [(dq, dqt) for dq, dqt in zip(self.d_coordinates, self.d_coordinates_t)]
-        vprint(self.subs_dq2dqt)
         self.subs_ddq2ddqt = [(ddq, ddqt) for ddq, ddqt in zip(self.dd_coordinates, self.dd_coordinates_t)]
-        vprint(self.subs_ddq2ddqt)
         self.subs_qt2q = [(qt, q) for q, qt in zip(self.coordinates, self.coordinates_t)]
-        vprint(self.subs_qt2q)
         self.subs_dqt2dq = [(dqt, dq) for dq, dqt in zip(self.d_coordinates, self.d_coordinates_t)]
-        vprint(self.subs_dqt2dq)
         self.subs_ddqt2ddq = [(ddqt, ddq) for ddq, ddqt in zip(self.dd_coordinates, self.dd_coordinates_t)]
-        vprint(self.subs_ddq2ddqt)
 
         self.dq_for_frame = list(range(self.frame_num))
         self.ddq_for_frame = list(range(self.frame_num))
@@ -163,7 +134,9 @@ class RobotDef:
         self.Fv = list(range(self.frame_num))
         self.Fo = list(range(self.frame_num))
         self.Ia = list(range(self.frame_num))
-        self.K = list(range(len(self.springs)))
+        self.K = list(range(len(self.spring_dl)))
+
+        self.spring_num = 0
 
         for num in self.link_nums[1:]:
             self.m[num] = new_sym('m'+str(num))
@@ -188,15 +161,9 @@ class RobotDef:
             if self.use_Ia[num]:
                 self.Ia[num] = new_sym('Ia' + str(num))
 
-        self.spring_num = len(self.springs)
-        for i in range(self.spring_num):
-            self.K[i] = new_sym('K' + str(i))
-
-        vprint(self.m)
-        vprint(self.l)
-        vprint(self.r)
-        vprint(self.I_vec, self.L_vec)
-        vprint(self.K)
+            if self.spring_dl[num] != None:
+                self.K[num] = new_sym('K' + str(num))
+                self.spring_num += 1
 
     def _dyn_params(self):
         self.std_params = []
@@ -227,12 +194,6 @@ class RobotDef:
                 self.bary_params += [self.Ia[num]]
                 self.std_params += [self.Ia[num]]
 
-        for k in self.K:
-            self.bary_params += [k]
-            self.std_params += [k]
-
-        vprint("Barycentric parameters:")
-        vprint(sympy.Matrix(self.bary_params))
-
-        vprint("Standard parameters:")
-        vprint(sympy.Matrix(self.std_params))
+            if self.spring_dl[num] != None:
+                self.bary_params += [self.K[num]]
+                self.std_params += [self.K[num]]
