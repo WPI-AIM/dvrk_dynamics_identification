@@ -1,16 +1,16 @@
 # A dynamic model identification package for the da Vinci Research Kit (under development)
 
 There are parallelograms, springs, tendon couplings, cables, and counterweight in da Vinci Research Kit (dVRK)
-so that we can not use existing toolsto identify the dynamic parameters of it.
+so that we can not use existing tools to identify the dynamic parameters of it.
 This software framework was developed to solve these problems.
 Although this package was initially developed for the dVRK, it is also very easy to use it to identify the dynamic
 parameters of other robots.
+
 
 ## Procedure
 
 <p align="center">
   <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/workflow.png" width="500" title="hover text">
-
 </p>
 
 ## Features
