@@ -1,6 +1,6 @@
 # A dynamic model identification package for the da Vinci Research Kit (under development)
 
-There are parallelograms, springs, tendon couplings, cables, and counterweight in da Vinci surgical system so that we can not use existing tools
+There are parallelograms, springs, tendon couplings, cables, and counterweight in da Vinci Research Kit (dVRK) so that we can not use existing tools
 to solve the dynamics model identification of it. This software framework was developed to solve these problems.
 
 
@@ -21,9 +21,9 @@ to solve the dynamics model identification of it. This software framework was de
     * Ordinary Least Square (OLS)
     * Weighted Least Square (WLS)
     * Semi-definite Programming (SDP)
-* Excitation of robots, using dvrk ROS library
+* Excitation of robots, using dVRK ROS library
 ### Yet to be done
-* Output of the identified paramters
+* Output of the identified parameters to files
 * Output of C++ or Python code of identified dynamic model for control use 
 
 * Regularize output print
@@ -33,13 +33,13 @@ to solve the dynamics model identification of it. This software framework was de
 * Python modules
     * NumPy, SciPy, SymPy, CvxOpt, Matplotlib, PyOpt, cloudpickle
 
-## Application and example
+## Examples
 * [Master Tool Manipulator (MTM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/develop/main_mtm.ipynb)
 
 * [Patient Side Manipulator (PSM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/develop/main_psm.ipynb)
 
 ## Author
-Yan Wang, Radian
+Yan Wang and Radian Gondokaryono, from WPI AIM Lab 
 
 ## Reference
 When developing this work, we referred a lot from the following places:
@@ -47,7 +47,7 @@ When developing this work, we referred a lot from the following places:
 * [FloBaRoID](https://github.com/kjyv/FloBaRoID)
 
 ## Some problems
-When I was using PyOpt, I found some problems with it. In pySLSQP.py file, these changes should be done.
+When I was using PyOpt, I found some problems with it. In pySLSQP.py file, these changes should be done to make it work.
 ```
 gg = numpy.zeros([la], numpy.float) ==> gg = numpy.zeros(la, numpy.float)
 
