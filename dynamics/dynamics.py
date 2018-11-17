@@ -80,10 +80,16 @@ class Dynamics:
                     dq_da = sympy.diff(dq, self.rbt_def.d_coordinates[a])
                     tau[a] += dq_da * tau_f
 
-        for k in range(len(self.rbt_def.K)):
-            tau_k = self.rbt_def.springs[k] * self.rbt_def.K[k]
-            index = self.rbt_def.coordinates.index(list(self.rbt_def.springs[k].free_symbols)[0])
-            tau[index] += -tau_k
+            if self.rbt_def.spring_dl[i] != None:
+                tau_s = self.rbt_def.spring_dl[i] * self.rbt_def.K[i]
+                for a in range(len(self.rbt_def.d_coordinates)):
+                    dq_da = sympy.diff(dq, self.rbt_def.d_coordinates[a])
+                    tau[a] -= dq_da * tau_s
+
+        # for k in range(len(self.rbt_def.K)):
+        #     tau_k = self.rbt_def.springs[k] * self.rbt_def.K[k]
+        #     index = self.rbt_def.coordinates.index(list(self.rbt_def.springs[k].free_symbols)[0])
+        #     tau[index] += -tau_k
 
         print("Add motor inertia...")
 

@@ -6,7 +6,7 @@ from utils import gen_DLki_mat
 
 
 class SDPOpt:
-    def __init__(self, W, tau, rbt_def, value_constraints=[], spring_constraints=[]):
+    def __init__(self, W, tau, rbt_def, value_constraints=[]):
         self.small_positive_num = 0.000001
         self.min_Fc = 0.001
         self.min_Fv = 0.001
@@ -22,18 +22,13 @@ class SDPOpt:
                 raise ValueError("Value constraint number {} should be the same as " +
                                  "the joint number of the robot {}.".format(value_constraints_len, self._rbt_def.frame_num - 1))
             for c in value_constraints:
-                if len(c) != 11:
+                if len(c) != 13:
                     raise ValueError("The constraint should be a tuple of " +
-                                     "(min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z, max_Fc, max_Fv, max_Fo).")
+                                     "(min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z, max_Fc, max_Fv, max_Fo, min_K, max_K).")
                 if c[0] < 0 or c[1] < 0:
                     raise ValueError("Mass constraints should be positive.")
 
         self._value_constraints = value_constraints
-
-        if len(spring_constraints) == self._rbt_def.spring_num:
-            self._spring_constraints = spring_constraints
-        else:
-            raise ValueError("The spring number is not equal to the spring constraint number.")
 
         print("Regressor shape: {}".format(W.shape))
         print("Regressand shape: {}".format(tau.shape))
@@ -68,7 +63,8 @@ class SDPOpt:
 
             # constraint order: (min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z)
             if len(self._value_constraints) != 0:
-                min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z, max_Fc, max_Fv, max_Fo = self._value_constraints[f - 1]
+                min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z, max_Fc, max_Fv, max_Fo, min_K, max_K =\
+                    self._value_constraints[f - 1]
 
                 if self._rbt_def.use_inertia[f]:
                     # mass of center position
@@ -112,6 +108,11 @@ class SDPOpt:
                     self._constraints.append(self._x[i_param] >= self.min_Ia)
                     i_param += 1
 
+                # Spring
+                if self._rbt_def.spring_dl[f] != None:
+                    self._constraints.append(self._x[i_param] >= min_K)
+                    self._constraints.append(self._x[i_param] <= max_K)
+                    i_param += 1
             else:
                 if self._rbt_def.use_inertia[f]:
                     i_param += 10
@@ -133,12 +134,6 @@ class SDPOpt:
                 if self._rbt_def.use_Ia[f]:
                     i_param += 1
 
-        # Constraints for spring stiffness
-        for i in range(self._rbt_def.spring_num):
-            self._constraints.append(self._x[i_param] >= self._spring_constraints[i][0])
-            self._constraints.append(self._x[i_param] <= self._spring_constraints[i][1])
-            i_param += 1
-
     def solve(self):
         self._create_var()
         self._create_obj()
@@ -154,25 +149,3 @@ class SDPOpt:
         # print(self._x.value)
         # print(result)
 
-
-
-
-# m = 30000
-# n = 100
-# np.random.seed(1)
-# A = np.random.randn(m, n)
-# b = np.random.randn(m)
-#
-# # Construct the problem.
-# x = cp.Variable(n)
-# objective = cp.Minimize(cp.sum_squares(A*x - b))
-# constraints = [x <= 1, x >= -1]
-# prob = cp.Problem(objective, constraints)
-#
-# # The optimal objective value is returned by `prob.solve()`.
-# result = prob.solve(solver=cp.OSQP)
-# # The optimal value for x is stored in `x.value`.
-# print(x.value)
-# # The optimal Lagrange multiplier for a constraint is stored in
-# # `constraint.dual_value`.
-# print(constraints[0].dual_value)

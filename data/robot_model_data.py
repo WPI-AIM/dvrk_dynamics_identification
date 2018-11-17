@@ -28,6 +28,7 @@ class RobotModel:
         self.friction_type = dyn.rbt_def.friction_type
         self.use_Ia = dyn.rbt_def.use_Ia
         self.spring_num = dyn.rbt_def.spring_num
+        self.spring_dl = dyn.rbt_def.spring_dl
 
         #Problems Loading matrix
         #self.T_0n = dyn.geom.T_0n[3] #Matrix?? 3 sucks
