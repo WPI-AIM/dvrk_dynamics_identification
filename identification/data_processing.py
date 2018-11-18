@@ -7,7 +7,7 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 from utils import ml2r, Lmr2I, inertia_vec2tensor, inertia_tensor2vec
-
+import sympy
 
 # the format of file should be q0, tau0, q1, tau1, ..., qn, taun
 def load_trajectory_data(file, freq):
@@ -439,3 +439,71 @@ def barycentric2standard_params(x, rbt_def):
 
     return x_out
 
+
+def import_test():
+    return 0
+
+
+def params_array2table(param_value, rbt_def, std_or_bary):
+    i = 0 # param_value count
+    i_link = 1
+    table = sympy.zeros(rbt_def.frame_num, 15+1)
+    std_param_str = ['link', 'I_xx', 'I_xy', 'I_xz', 'I_yy', 'I_yz', 'I_zz', 'r_x', 'r_y', 'r_z', 'm', 'F_c', 'F_v', 'F_o', 'I_m',
+                 'K']
+    bary_param_str = ['link', 'L_xx', 'L_xy', 'L_xz', 'L_yy', 'L_yz', 'L_zz', 'l_x', 'l_y', 'l_z', 'm', 'F_c', 'F_v', 'F_o', 'I_m',
+                 'K']
+    param_str = std_param_str
+    if std_or_bary == 'bary':
+        param_str = bary_param_str
+
+    n_sym = 'None'
+    for k in range(len(param_str)):
+        table[0, k] = param_str[k]
+
+    while i_link < rbt_def.frame_num:
+        table[i_link, 0] = i_link
+        for j in range(10):
+            if rbt_def.use_inertia[i_link]:
+                table[i_link, j + 1] = param_value[i]
+                i += 1
+            else:
+                table[i_link, j + 1] = n_sym
+
+        if rbt_def.use_friction[i_link]:
+            if 'Coulomb' in rbt_def.friction_type:
+                table[i_link, 11] = param_value[i]
+                i += 1
+            else:
+                table[i_link, 11] = n_sym
+
+            if 'viscous' in rbt_def.friction_type:
+                table[i_link, 12] = param_value[i]
+                i += 1
+            else:
+                table[i_link, 12] = n_sym
+
+            if 'offset' in rbt_def.friction_type:
+                table[i_link, 13] = param_value[i]
+                i += 1
+            else:
+                table[i_link, 13] = n_sym
+        else:
+            table[i_link, 11] = n_sym
+            table[i_link, 12] = n_sym
+            table[i_link, 13] = n_sym
+
+        if rbt_def.use_Ia[i_link]:
+            table[i_link, 14] += param_value[i]
+            i += 1
+        else:
+            table[i_link, 14] = n_sym
+
+        if rbt_def.spring_dl[i_link] != None:
+            table[i_link, 15] += param_value[i]
+            i += 1
+        else:
+            table[i_link, 15] = n_sym
+
+        i_link += 1
+
+    return table
