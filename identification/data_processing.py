@@ -215,101 +215,6 @@ def diff_and_filt_data(dof, h, t, q_raw, dq_raw, tau_raw, fc_q, fc_tau, fc_dq, f
     return t[cut_num:-cut_num],\
            q[cut_num:-cut_num, :], dq[cut_num:-cut_num, :], ddq[cut_num:-cut_num, :], tau[cut_num:-cut_num, :],\
            q_raw[cut_num:-cut_num, :], tau_raw[cut_num:-cut_num, :]
-#
-#
-# def range_taus(range_link):
-#     ti = range_link[0] - 1
-#     tf = range_link[-1]
-#     return range(ti, tf)
-#
-#
-# def range_parms(range_link):
-#     pi = rbt.rB[range_link[0] - 1]
-#     pf = rbt.rB[range_link[-1]]
-#     return range(pi, pf)
-#
-#
-# def ident_matrices(parms, rbt, q, dq, ddq, tau, range_linktaus=None, range_linkparms=None):
-#     parms = parms.lower()
-#
-#     if range_linktaus == None:
-#         range_linktaus = (1, rbt.dof)
-#     if range_linkparms == None:
-#         range_linkparms = (1, rbt.dof)
-#
-#     ti = range_linktaus[0] - 1
-#     tf = range_linktaus[-1]
-#
-#     tn = tf - ti
-#
-#     if parms == 'all':
-#         pi = rbt.r[range_linkparms[0] - 1]
-#         pf = rbt.r[range_linkparms[-1]]
-#     elif parms == 'effective':
-#         pi = rbt.rE[range_linkparms[0] - 1]
-#         pf = rbt.rE[range_linkparms[-1]]
-#     elif parms == 'base':
-#         pi = rbt.rB[range_linkparms[0] - 1]
-#         pf = rbt.rB[range_linkparms[-1]]
-#
-#     pn = pf - pi
-#
-#     s = q.shape[0]
-#
-#     W = numpy.zeros((tn * s, pn))
-#     T = numpy.zeros(tn * s)
-#
-#     if parms == 'all':
-#         for i in range(s):
-#             W[i * tn: i * tn + tn, :] = rbt_Y(q[i, :], dq[i, :], ddq[i, :])[ti:tf, pi:pf]
-#     elif parms == 'effective':
-#         for i in range(s):
-#             W[i * tn: i * tn + tn, :] = (matrix(rbt_Y(q[i, :], dq[i, :], ddq[i, :])) * rbt.D_EY).numpy()[ti:tf, pi:pf]
-#     elif parms == 'base':
-#         for i in range(s):
-#             W[i * tn: i * tn + tn, :] = rbt_YB(q[i, :], dq[i, :], ddq[i, :])[ti:tf, pi:pf]
-#
-#     for i in range(s):
-#         T[i * tn: i * tn + tn] = tau[i][ti:tf]
-#
-#     return W, T
-#
-
-
-
-# def regr_matrices(dof, parm_num, q, dq, ddq, tau, regr_func):
-#     sn = q.shape[0]
-#
-#     H_S = numpy.matrix(numpy.zeros((dof * sn, parm_num)))
-#     tau_S = numpy.matrix(numpy.zeros(dof * sn)).T
-#
-#     for i in range(sn):
-#         H_S[i * dof: i * dof + dof, :] = numpy.array(regr_func(q[i], dq[i], ddq[i])).reshape(dof, parm_num)
-#
-#     for i in range(sn):
-#         tau_S[i * dof: i * dof + dof] = numpy.mat(tau[i]).T
-#
-#     return H_S, tau_S
-#
-#
-# import sympybotics as spb
-#
-#
-# def gen_regr_matrices(rbt, q, dq, ddq, tau):
-#     exec spb.robot_code_to_func('python', rbt.H_code, 'H', 'regressor_func', rbt.rbtdef)
-#     global sin, cos, sign
-#     sin = numpy.sin
-#     cos = numpy.cos
-#     sign = numpy.sign
-#
-#     H_S, omega = regr_matrices(rbt.dof, rbt.dyn.n_dynparms, q, dq, ddq, tau, regressor_func)
-#     W = numpy.matrix(H_S[:, rbt.dyn.base_idxs])
-#
-#     Q1, R1 = numpy.linalg.qr(W)
-#     rho1 = Q1.T * omega
-#     del H_S
-#
-#     return W, omega, Q1, R1, rho1
 
 
 def plot_trajectory_data(t, q_raw, q_f, dq_f, ddq_f, tau_raw, tau_f):
@@ -398,7 +303,7 @@ def gen_regressor(param_num, H, q, dq, ddq, tau):
     return W, tau_s
 
 
-def barycentric2standard_params(x, rbt_def):
+def barycentric2standard_params(x, rbt_def, Rs=None):
     i = 0
     i_link = 1
     x_out = []
@@ -410,7 +315,13 @@ def barycentric2standard_params(x, rbt_def):
             L_mat = inertia_vec2tensor(x[i: i + 6])
             I_vec = inertia_tensor2vec(Lmr2I(L_mat, m, r))
 
-            #print(I_vec, r, m)
+            if Rs:
+                R = Rs[i_link - 1]
+                RI = np.matmul(R, np.matrix(inertia_vec2tensor(I_vec)).astype(np.float64))
+                I_vec = inertia_tensor2vec(np.matmul(RI, R.transpose()))
+                I_vec = np.array(I_vec).astype(np.float64).tolist()
+                r = np.matmul(R, np.array(r).transpose()).tolist()[0]
+
             x_out += I_vec + r + [m]
 
             i += 10
@@ -440,10 +351,6 @@ def barycentric2standard_params(x, rbt_def):
     return x_out
 
 
-def import_test():
-    return 0
-
-
 def params_array2table(param_value, rbt_def, std_or_bary):
     i = 0 # param_value count
     i_link = 1
@@ -456,7 +363,7 @@ def params_array2table(param_value, rbt_def, std_or_bary):
     if std_or_bary == 'bary':
         param_str = bary_param_str
 
-    n_sym = 'None'
+    n_sym = 0
     for k in range(len(param_str)):
         table[0, k] = param_str[k]
 
@@ -507,3 +414,49 @@ def params_array2table(param_value, rbt_def, std_or_bary):
         i_link += 1
 
     return table
+
+
+def write_parameters2json(table, folder, name):
+    json_data = {}
+    for i in range(table.shape[0] - 1):
+        link_num = i + 1
+        link_data = {
+            'I': [float(table[link_num, 1]),
+                  float(table[link_num, 2]),
+                  float(table[link_num, 3]),
+                  float(table[link_num, 4]),
+                  float(table[link_num, 5]),
+                  float(table[link_num, 6])],
+            'r': [float(table[link_num, 7]),
+                  float(table[link_num, 8]),
+                  float(table[link_num, 9])],
+            'm': float(table[link_num, 10]),
+            'Fc': float(table[link_num, 11]),
+            'Fv': float(table[link_num, 12]),
+            'Fo': float(table[link_num, 13]),
+            'Im': float(table[link_num, 14]),
+            'K': float(table[link_num, 15])
+        }
+        json_data[str(link_num)] = link_data
+
+    import io, json, os, errno
+
+    file_name = folder + name + '.json'
+
+    if not os.path.exists(os.path.dirname(file_name)):
+        try:
+            os.makedirs(os.path.dirname(file_name))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+    with io.open(file_name, 'wb') as f:
+        f.write(json.dumps(json_data, sort_keys=True, indent=4))
+
+    print("Parameters have been written into [{}] successfully!".format(file_name))
+
+
+def trans_inertia(I, r, R):
+    I1 = np.matmul(np.matmul(R.transpose(), I), R)
+    r1 = np.matmul(R.transpose(), r)
+    return I1, r1

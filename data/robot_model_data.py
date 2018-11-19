@@ -30,6 +30,8 @@ class RobotModel:
         self.spring_num = dyn.rbt_def.spring_num
         self.spring_dl = dyn.rbt_def.spring_dl
 
+        self.R = dyn.geom.R
+
         #Problems Loading matrix
         #self.T_0n = dyn.geom.T_0n[3] #Matrix?? 3 sucks
         #self.T_0n = dyn.geom.T_0n

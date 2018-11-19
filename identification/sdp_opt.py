@@ -134,7 +134,7 @@ class SDPOpt:
                 if self._rbt_def.use_Ia[f]:
                     i_param += 1
 
-    def solve(self):
+    def solve(self, max_it=5000):
         self._create_var()
         self._create_obj()
         self._create_constraints()
@@ -142,7 +142,7 @@ class SDPOpt:
         print("Solving problem...")
         self._prob = cp.Problem(self._obj, self._constraints)
 
-        result = self._prob.solve(solver=cp.SCS, verbose=True, max_iters=5000)
+        result = self._prob.solve(solver=cp.SCS, verbose=True, max_iters=max_it)
         # result = self._prob.solve(solver=cp.CVXOPT, verbose=True)
 
         self.x_result = self._x.value
