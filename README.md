@@ -20,7 +20,7 @@ parameters of other robots.
     * Dynamic modelling
     * Base parameter generation using QR decomposition
 * Optimal excitation trajectory generation based on fourier-series
-
+* Excitation of robots, using [dVRK ROS stack](https://github.com/jhu-dvrk/dvrk-ros)
 * Data processing
     * Derive velocity and acceleration from position measurements
     * Zero-phase low-pass filter for original data
@@ -30,11 +30,8 @@ parameters of other robots.
     * Ordinary Least Square (OLS)
     * Weighted Least Square (WLS)
     * Convex Optimization
-* Excitation of robots, using [dVRK ROS stack](https://github.com/jhu-dvrk/dvrk-ros)
-### Yet to be done
-* Output of the identified parameters to files
-* Output of C++ or Python code of identified dynamic model for control use 
-* Regularize output print
+
+* Output of the identified parameters to json files
 
 ## Requirements
 * Python 2.7
@@ -59,7 +56,7 @@ When developing this work, we referred a lot from the following places:
 * [FloBaRoID](https://github.com/kjyv/FloBaRoID)
 
 ## Some problems
-When I was using PyOpt, I found some problems with it. In pySLSQP.py file, these changes should be made to make it work.
+When I was using PyOpt, I found some problems with it. In ```pySLSQP.py``` file, these changes should be made to make it work.
 ```
 gg = numpy.zeros([la], numpy.float) ==> gg = numpy.zeros(la, numpy.float)
 
@@ -69,5 +66,6 @@ w = numpy.zeros([lw], numpy.float) ==> w = numpy.zeros(lw, numpy.float)
 
 jw = numpy.zeros([ljw], numpy.intc) ==> jw = numpy.zeros(ljw, numpy.intc)
 ```
+Or simply replace the ```pySOLVOPT.py``` file in ```anaconda2/lib/python2.7/site-packages/pyOpt/pySOLVOPT/``` with the file in ```dyn_ident_py/design``` of this repository.
 
 		
