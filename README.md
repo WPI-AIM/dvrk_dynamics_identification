@@ -43,7 +43,7 @@ Anaconda is recommended.
 
 
 ## Examples
-* [Master Tool Manipulator (MTM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/master/main_mtm.ipynb)
+* [Master Tool Manipulator (MTM)](main_mtm.ipynb)
 
 * [Patient Side Manipulator (PSM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/master/main_psm.ipynb)
 
