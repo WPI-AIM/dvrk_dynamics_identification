@@ -10,7 +10,7 @@ parameters of other robots.
 ## Procedure
 
 <p align="center">
-  <img src="https://github.com/wangyanhit/dyn_ident_sympy/blob/master/design/workflow.png" width="500" title="hover text">
+  <img src="design/workflow.png" width="500" title="hover text">
 </p>
 
 ## Features
