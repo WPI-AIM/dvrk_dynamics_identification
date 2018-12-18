@@ -45,7 +45,7 @@ Anaconda is recommended.
 ## Examples
 * [Master Tool Manipulator (MTM)](main_mtm.ipynb)
 
-* [Patient Side Manipulator (PSM)](https://github.com/wangyanhit/dyn_ident_sympy/blob/master/main_psm.ipynb)
+* [Patient Side Manipulator (PSM)](main_psm.ipynb)
 
 ## Author
 Yan Wang and Radian Gondokaryono, from [WPI AIM Lab](http://aimlab.wpi.edu/) 
