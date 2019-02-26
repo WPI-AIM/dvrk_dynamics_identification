@@ -82,7 +82,7 @@ class Geometry:
             self.p_n_func[num] = sympy.lambdify(input_vars, self.p_n[num])
 
     def draw_geom(self, angle=0):
-        frame_drawer = FrameDrawer((-0.6, 0.4), (-0.4, 0.4), (-0.6, 0.2))
+        frame_drawer = FrameDrawer((-0.6, 0.6), (-0.4, 0.4), (-0.7, 0.7))
 
         if angle == 0:
             subs_q2zero = [(q, angle) for q in self.rbt_df.coordinates]

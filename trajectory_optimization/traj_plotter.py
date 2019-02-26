@@ -46,7 +46,7 @@ class TrajPlotter:
         #print(self._frame_traj)
 
     def plot_desired_traj(self, fourier_x, position_only=False):
-        font_size_def = 9.0
+        font_size_def = 15.0
 
         x = self._fourier_traj.t
 
@@ -56,7 +56,7 @@ class TrajPlotter:
 
         plt_q = fig.add_subplot(311)
 
-        plt_q.margins(x=0.002, y=0.02)
+        # plt_q.margins(x=0.002, y=0.12)
         #plt_q.set_title("Optimal Excitation Trajectory")
 
         # position
@@ -80,7 +80,7 @@ class TrajPlotter:
 
         # velocity
         plt_dq = fig.add_subplot(312)
-        plt_dq.margins(x=0.002, y=0.02)
+        # plt_dq.margins(x=0.002, y=0.12)
         for d in range(self._fourier_traj.dof):
             _, linestyle = linestyles[d]
             plt_dq.plot(x, dq[:, d], label=(r"$\dot{q}^m_"+str(d+1)+"$"), linestyle=linestyle)
@@ -92,7 +92,7 @@ class TrajPlotter:
 
         # acceleration
         plt_ddq = fig.add_subplot(313)
-        plt_ddq.margins(x=0.002, y=0.02)
+        # plt_ddq.margins(x=0.002, y=0.12)
         for d in range(self._fourier_traj.dof):
             #print('traj:', d)
             _, linestyle = linestyles[d]
@@ -102,7 +102,7 @@ class TrajPlotter:
         plt_ddq.set_xlabel(r'$t$ (s)', fontsize=font_size_def)
         plt_ddq.set_ylabel(r'$\ddot{q}^m$ (rad/s$^2$ or m/s$^2$)', fontsize=font_size_def)
         plt_ddq.tick_params(labelsize=font_size_def)
-        #plt.tight_layout()
+        plt.tight_layout()
         plt.show()
 
     def plot_measured_traj(self):

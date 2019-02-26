@@ -262,7 +262,8 @@ def plot_meas_pred_tau(t, tau_m, tau_p, joint_type, coordinates):
 
     fig = plt.figure()
 
-    font_size_def = 9.0
+    # font_size_def = 9.0
+    font_size_def = 14.0
 
     for i in range(dof):
         plt_tau = fig.add_subplot(dof, 1, i + 1)
@@ -280,10 +281,10 @@ def plot_meas_pred_tau(t, tau_m, tau_p, joint_type, coordinates):
             plt_tau.set_ylabel(r'$f^m_{}$ (N)'.format(coordinates[i].name[1:], fontsize=font_size_def))
         # plt_tau.legend(['Measured', "Predicted"])
         if i == 0:
-            plt_tau.legend(bbox_to_anchor=(0.0, 1.40, 1.0, .102), loc='upper center', ncol=3,
+            plt_tau.legend(bbox_to_anchor=(0.0, 1.60, 1.0, .102), loc='upper center', ncol=3,
                            mode="expand", borderaxespad=0., fontsize=font_size_def)
         plt_tau.tick_params(labelsize=font_size_def)
-    # plt.tight_layout()
+    plt.tight_layout()
     plt.show()
 
 
