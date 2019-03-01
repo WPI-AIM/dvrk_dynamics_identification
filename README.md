@@ -41,6 +41,8 @@ parameters of other robots.
 
 Anaconda is recommended.
 
+## Document
+[A dynamic model identification package for the da Vinci Research Kit](https://arxiv.org/abs/1902.10875)
 
 ## Examples
 * [Master Tool Manipulator (MTM)](main_mtm.ipynb)
@@ -50,7 +52,7 @@ Anaconda is recommended.
 ## Author
 Yan Wang and Radian Gondokaryono, from [WPI AIM Lab](http://aimlab.wpi.edu/) 
 
-## Reference
+## Other similar packages
 When developing this work, we referred a lot from the following places:
 * [SymPyBotics](https://github.com/cdsousa/SymPyBotics)
 * [FloBaRoID](https://github.com/kjyv/FloBaRoID)
