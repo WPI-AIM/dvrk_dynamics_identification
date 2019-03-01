@@ -43,9 +43,9 @@ Anaconda is recommended.
 
 ## Reference paper
 A paper describing the modeling and identification of the dVRK using this package can be downloaded here.
-~~~
+
 [A dynamic model identification package for the da Vinci Research Kit](https://arxiv.org/abs/1902.10875)
-~~~
+
 
 The bibtex code for including this citation is provided:
 ~~~
