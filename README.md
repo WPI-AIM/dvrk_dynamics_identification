@@ -41,6 +41,23 @@ parameters of other robots.
 
 Anaconda is recommended.
 
+## Reference paper
+A paper describing the modeling and identification of the dVRK using this package can be downloaded here.
+
+[A dynamic model identification package for the da Vinci Research Kit](https://arxiv.org/abs/1902.10875)
+
+
+The bibtex code for including this citation is provided:
+~~~
+@misc{dynamic_model_iden,
+    author = {Wang, Yan and Gondokaryono, Radian and Munawar, Adnan and Fischer, Gregory S},
+    title = "{A Dynamic Model Identification Package for the da Vinci Research Kit}",
+    archivePrefix = "arXiv", 
+    note = {arXiv:1902.10875},
+    year = 2019,
+    month = feb,
+}
+~~~
 
 ## Examples
 * [Master Tool Manipulator (MTM)](main_mtm.ipynb)
@@ -50,7 +67,7 @@ Anaconda is recommended.
 ## Author
 Yan Wang and Radian Gondokaryono, from [WPI AIM Lab](http://aimlab.wpi.edu/) 
 
-## Reference
+## Other similar packages
 When developing this work, we referred a lot from the following places:
 * [SymPyBotics](https://github.com/cdsousa/SymPyBotics)
 * [FloBaRoID](https://github.com/kjyv/FloBaRoID)
