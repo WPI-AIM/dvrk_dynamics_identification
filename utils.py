@@ -90,6 +90,48 @@ def gen_DLki_mat():
     return M
 
 
+def gen_DLki_mat4():
+    M = list(range(10))
+    for i in range(10):
+        M[i] = np.zeros((4, 4))
+    # Lxx
+    M[0][0, 0] = -0.5
+    M[0][1, 1] = 0.5
+    M[0][2, 2] = 0.5
+
+    # Lxy
+    M[1][0, 1] = -1
+    M[1][1, 0] = -1
+    # Lxz
+    M[2][0, 2] = -1
+    M[2][2, 0] = -1
+    # Lyy
+    M[3][0, 0] = 0.5
+    M[3][1, 1] = -0.5
+    M[3][2, 2] = 0.5
+
+    # Lyz
+    M[4][1, 2] = -1
+    M[4][2, 1] = -1
+    # Lzz
+    M[5][0, 0] = 0.5
+    M[5][1, 1] = 0.5
+    M[5][2, 2] = -0.5
+    # lx
+    M[6][0, 3] = 1
+    M[6][3, 0] = 1
+    # ly
+    M[7][1, 3] = 1
+    M[7][3, 1] = 1
+    # lz
+    M[8][2, 3] = 1
+    M[8][3, 2] = 1
+    # m
+    M[9][3, 3] = 1
+
+    return M
+
+
 def save_data(folder, name, data):
     model_file = folder + name + '.pkl'
 

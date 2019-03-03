@@ -2,7 +2,7 @@ import cvxpy as cp
 import numpy as np
 import sympy
 import osqp
-from utils import gen_DLki_mat
+from utils import gen_DLki_mat, gen_DLki_mat4
 
 
 class SDPOpt:
@@ -46,7 +46,8 @@ class SDPOpt:
 
         print("Creating constraints...")
 
-        DLkis = gen_DLki_mat()
+        # DLkis = gen_DLki_mat()
+        DLkis4 = gen_DLki_mat4()
 
         i_param = 0
 
@@ -55,11 +56,18 @@ class SDPOpt:
                 continue
 
             if self._rbt_def.use_inertia[f]:
+                # physical semi-consistency
                 # semi-definite
-                D = np.zeros((6, 6))
+                # D = np.zeros((6, 6))
+                # for i in range(10):
+                #     D += DLkis[i] * self._x[i_param + i]
+                # self._constraints.append(D >> np.identity(6) * self.small_positive_num)
+
+                # physical consistency
+                D4 = np.zeros((4, 4))
                 for i in range(10):
-                    D += DLkis[i] * self._x[i_param + i]
-                self._constraints.append(D >> np.identity(6) * self.small_positive_num)
+                    D4 += DLkis4[i] * self._x[i_param + i]
+                self._constraints.append(D4 >> np.identity(4) * self.small_positive_num)
 
             # constraint order: (min_m, max_m, min_x, max_x, min_y, max_y, min_z, max_z)
             if len(self._value_constraints) != 0:
