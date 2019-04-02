@@ -60,10 +60,12 @@ The bibtex code for including this citation is provided:
 ~~~
 
 ## Examples
-* [Master Tool Manipulator (MTM)](main_mtm.ipynb)
- [Data collection video for the MTM](https://www.youtube.com/watch?v=Sr3Uku1zgDw&index=5&list=PLkjUJbdG0RkTyNv7_gz-2ws8oqGo_xPtc&t=0s)
+* Master Tool Manipulator (MTM)
+  * [IPYNB file](main_mtm.ipynb)
+  * [Data collection video](https://www.youtube.com/watch?v=Sr3Uku1zgDw&index=5&list=PLkjUJbdG0RkTyNv7_gz-2ws8oqGo_xPtc&t=0s)
 
-* [Patient Side Manipulator (PSM)](main_psm.ipynb)
+* Patient Side Manipulator (PSM)
+  * [IPYNB file](main_psm.ipynb)
 
 ## Author
 Yan Wang and Radian Gondokaryono, from [WPI AIM Lab](http://aimlab.wpi.edu/) 
