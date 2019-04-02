@@ -61,6 +61,7 @@ The bibtex code for including this citation is provided:
 
 ## Examples
 * [Master Tool Manipulator (MTM)](main_mtm.ipynb)
+ [Data collection video for the MTM](https://www.youtube.com/watch?v=Sr3Uku1zgDw&index=5&list=PLkjUJbdG0RkTyNv7_gz-2ws8oqGo_xPtc&t=0s)
 
 * [Patient Side Manipulator (PSM)](main_psm.ipynb)
 
