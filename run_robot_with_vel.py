@@ -16,32 +16,32 @@ import matplotlib.pyplot as plt
 
 # Fist, several things we have to define before running it
 
-model_name = 'mtm'
-#model_name = 'psm_simplified'
+# model_name = 'mtm'
+model_name = 'psm_simplified'
 
 
-#robotname = 'PSM1'
-robotname = 'MTMR'
+robotname = 'PSM1'
+# robotname = 'MTMR'
 
 motor2dvrk_psm = np.array([[1.0186, 0, 0], [-.8306, .6089, .6089], [0, -1.2177, 1.2177]])
 motor2dvrk_mtm = np.array([[1.0, 0, 0], [-1.0, 1.0, 0], [0.6697, -0.6697, 1.0]])
 
 #PSM
 
-#scales = np.array([1, 1, 1, 1, 1, 1, 1])
+scales = np.array([1, 1, 1, 1, 1, 1, 1])
 #scales = np.array([0.5, 0.5, 0.5, 0.75, 0.75, 0.75, 0.75])
 
 #MTM
-scales = np.array([0.7, 0.85, 0.85, 0.85, 1, 1, 1])
+# scales = np.array([0.7, 0.85, 0.85, 0.85, 1, 1, 1])
 
 # wait for a short period of time before recording data
 stable_time = 5
 sampling_time = 30
 sampling_rate = 200
-speedscale = 1
+speedscale = 0.5
 
 
-trajectory_name = 'two'
+trajectory_name = 'one'
 testname = trajectory_name
 
 model_folder = 'data/' + model_name + '/model/'
@@ -57,7 +57,7 @@ print (dof)
 if scales.shape[0] != dof:
 	raise Exception()
 
-# Scale it first 
+# Scale it first
 param_num_for_one_joint = 1+2*fourier_order
 for i in range(dof):
 	traj_optimizer_result[1+i*param_num_for_one_joint: 7+i*param_num_for_one_joint] *= scales[i]
@@ -146,7 +146,7 @@ while i < len(a) and not rospy.is_shutdown():
 			states[state_cnt][dof-1] = p.get_current_jaw_position()
 
 			#print('error', a[i,:] - states[state_cnt][0:dof])
-			
+
 			states[state_cnt][dof:dof*2 - 1] = p.get_current_joint_velocity()[0:dof-1]
 			states[state_cnt][dof*2 - 1] = p.get_current_jaw_velocity()
 
@@ -186,7 +186,7 @@ else:
 		motor_state[i, 8:11] = np.matmul(np.linalg.inv(motor2dvrk_mtm), states[i, 8:11])
 		motor_state[i, 15:18] = np.matmul(motor2dvrk_mtm.transpose(), states[i, 15:18])
 	states = motor_state
-	
+
 # Save data
 data_file_dir = './data/' + model_name + '/measured_trajectory/' + testname + '_results.csv'
 
