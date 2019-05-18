@@ -38,7 +38,7 @@ scales = np.array([1, 1, 1, 1, 1, 1, 1])
 stable_time = 5
 sampling_time = 30
 sampling_rate = 200
-speedscale = 0.5
+speedscale = 1.0
 
 
 trajectory_name = 'one'
