@@ -288,6 +288,43 @@ def plot_meas_pred_tau(t, tau_m, tau_p, joint_type, coordinates):
     plt.show()
 
 
+def plot_meas_2pred_tau(t, tau_m, tau_p1, tau_p2, joint_type, coordinates):
+    sample_num, dof = tau_m.shape
+    t = t - t[0]
+
+    fig = plt.figure()
+    # matplotlib.pyplot.rcParams['pdf.fonttype'] = 42
+    # matplotlib.pyplot.rcParams['ps.fonttype'] = 42
+
+    # font_size_def = 9.0
+    font_size_def = 14.0
+
+    for i in range(dof):
+        plt_tau = fig.add_subplot(dof, 1, i + 1)
+        plt_tau.margins(x=0.002, y=0.02)
+
+        plt_tau.plot(t, tau_p1[:, i], color=(0,0,1), label="Predicted-F", linewidth=1)
+        plt_tau.plot(t, tau_p1[:, i] - tau_m[:, i], color='c', ls='-.', label="Error-F", linewidth=0.8)
+        plt_tau.plot(t, tau_p2[:, i], color=(1,0,0), label="Predicted-Y", linewidth=1)
+        plt_tau.plot(t, tau_p2[:, i] - tau_m[:, i], color='y', ls='-.', label="Error-Y", linewidth=0.8)
+        plt_tau.plot(t, tau_m[:, i], color='k', ls='--', label="Measured", linewidth=1.5)
+        # plt_tau.plot(t, tau_p[:, i] - tau_m[:, i], 'k--', label="Error", linewidth=1)
+        # zeros = np.zeros(tau_p[:, i].shape)
+        # plt_tau.plot(t, zeros, color='0.5', linewidth=0.75)
+        if i == dof-1:
+            plt_tau.set_xlabel(r'$t$ (s)', fontsize=font_size_def)
+        if joint_type[i] == 'R':
+            plt_tau.set_ylabel(r'$\tau^m_{}$ (Nm)'.format(coordinates[i].name[1:]), fontsize=font_size_def)
+        else:
+            plt_tau.set_ylabel(r'$f^m_{}$ (N)'.format(coordinates[i].name[1:], fontsize=font_size_def))
+        # plt_tau.legend(['Measured', "Predicted"])
+        if i == 0:
+            plt_tau.legend(bbox_to_anchor=(0.0, 1.60, 1.0, 0.502), loc='upper center', ncol=3,
+                           mode="expand", borderaxespad=0., fontsize=font_size_def)
+        plt_tau.tick_params(labelsize=font_size_def)
+    plt.tight_layout()
+    plt.show()
+
 def gen_regressor(param_num, H, q, dq, ddq, tau):
     sample_num, dof = q.shape
 
