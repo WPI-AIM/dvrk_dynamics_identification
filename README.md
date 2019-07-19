@@ -49,14 +49,7 @@ A paper describing the modeling and identification of the dVRK using this packag
 
 The bibtex code for including this citation is provided:
 ~~~
-@misc{dynamic_model_iden,
-    author = {Wang, Yan and Gondokaryono, Radian and Munawar, Adnan and Fischer, Gregory S},
-    title = "{A Dynamic Model Identification Package for the da Vinci Research Kit}",
-    archivePrefix = "arXiv", 
-    note = {arXiv:1902.10875},
-    year = 2019,
-    month = feb,
-}
+@ARTICLE{8758871, author={Y. {Wang} and R. {Gondokaryono} and A. {Munawar} and G. S. {Fischer}}, journal={IEEE Robotics and Automation Letters}, title={A Convex Optimization-based Dynamic Model Identification Package for the da Vinci Research Kit}, year={2019}, volume={}, number={}, pages={1-1}, keywords={Surgical Robotics: Laparoscopy;Dynamics;Calibration and Identification}, doi={10.1109/LRA.2019.2927947}, ISSN={2377-3766}, month={},}
 ~~~
 
 ## Examples
